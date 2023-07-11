@@ -32,10 +32,12 @@ let targets: [Target] = [
             resources: [
                 .glob(pattern: "Resources/**", excluding: ["**/GoogleService-Info.plist.encrypted"]),
             ],
+            entitlements: "Swirl.entitlements",
             dependencies: [
                 .external(name: "ComposableArchitecture"),
                 .external(name: "HyphenAuthenticate"),
                 .external(name: "TCACoordinators"),
+                .core,
             ]
         )
     ),
@@ -48,13 +50,6 @@ let project: Project = .makeModule(
     settings: .settings(
         base: [
             "OTHER_LDFLAGS": "-ObjC",
-            "HEADER_SEARCH_PATHS": [
-                "$(inherited)",
-                "$(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/GoogleSignIn-iOS/GoogleSignIn/Sources/Public",
-                "$(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/AppAuth-iOS/Source/AppAuth",
-                "$(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/AppAuth-iOS/Source/AppAuthCore",
-                "$(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
-                "$(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/Public/GTMAppAuth"],
         ]
     )
 )
