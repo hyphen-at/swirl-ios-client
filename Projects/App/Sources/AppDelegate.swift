@@ -1,5 +1,5 @@
 import ComposableArchitecture
-import Feature
+import HyphenAuthenticate
 import SwiftUI
 import UIKit
 
@@ -13,10 +13,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
         let viewController = UIHostingController(
-            rootView: CosmoApp(
+            rootView: SwirlApp(
                 store: Store(
-                    initialState: CosmoCoordinator.State(),
-                    reducer: CosmoCoordinator()
+                    initialState: SwirlCoordinator.State(),
+                    reducer: SwirlCoordinator()
                         .signpost()
                         ._printChanges()
                 )
