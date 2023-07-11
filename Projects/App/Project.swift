@@ -9,6 +9,12 @@ let targets: [Target] = [
                 with: [
                     "CFBundleShortVersionString": "1.0",
                     "CFBundleVersion": "1",
+                    "CFBundleURLTypes": [
+                        [
+                            "CFBundleTypeRole": "Editor",
+                            "CFBundleURLSchemes": ["com.googleusercontent.apps.201778913659-bvg35i2omhf2dbsdhdenia5pf3hrqvsh"],
+                        ],
+                    ],
                     "UILaunchStoryboardName": "LaunchScreen",
                     "UIApplicationSceneManifest": [
                         "UIApplicationSupportsMultipleScenes": false,
