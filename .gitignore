@@ -75,4 +75,4 @@ master.key
 *.cer
 
 ### Firebase
-GoogleServices-Info.plist
+GoogleService-Info.plist
