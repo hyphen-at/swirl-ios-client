@@ -26,7 +26,11 @@ let targets: [Target] = [
             resources: [
                 "Resources/**",
             ],
-            dependencies: []
+            dependencies: [
+                .external(name: "ComposableArchitecture"),
+                .external(name: "HyphenAuthenticate"),
+                .external(name: "TCACoordinators"),
+            ]
         )
     ),
 ]
@@ -34,5 +38,17 @@ let targets: [Target] = [
 let project: Project = .makeModule(
     name: "swirl",
     targets: targets,
-    resourceSynthesizers: [.assets()]
+    resourceSynthesizers: [.assets()],
+    settings: .settings(
+        base: [
+            "OTHER_LDFLAGS": "-ObjC",
+            "HEADER_SEARCH_PATHS": [
+                "$(inherited)",
+                "$(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/GoogleSignIn-iOS/GoogleSignIn/Sources/Public",
+                "$(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/AppAuth-iOS/Source/AppAuth",
+                "$(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/AppAuth-iOS/Source/AppAuthCore",
+                "$(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
+                "$(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/Public/GTMAppAuth"],
+        ]
+    )
 )
