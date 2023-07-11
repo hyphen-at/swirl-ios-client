@@ -106,7 +106,7 @@ public extension Target {
             newFactory.product = .app
             newFactory.name = Project.Environment.appName
             newFactory.bundleId = Project.Environment.bundlePrefix
-            newFactory.productName = "cosmo"
+            newFactory.productName = "Swirl"
         default:
             break
         }
