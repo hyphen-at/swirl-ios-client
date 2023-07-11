@@ -73,3 +73,6 @@ Tuist/Dependencies
 master.key
 *.p12
 *.cer
+
+### Firebase
+GoogleServices-Info.plist
