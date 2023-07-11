@@ -5,6 +5,12 @@ struct SampleScreen: View {
     let store: StoreOf<Sample>
 
     var body: some View {
-        ZStack {}
+        WithViewStore(store, observe: { $0 }) { viewStore in
+            ZStack {
+                Button("Login with Google", action: {
+                    viewStore.send(.onGoogleLoginButtonClick)
+                })
+            }
+        }
     }
 }

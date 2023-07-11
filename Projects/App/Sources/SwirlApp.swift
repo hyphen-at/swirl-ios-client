@@ -5,8 +5,6 @@ import TCACoordinators
 struct SwirlApp: View {
     let store: StoreOf<SwirlCoordinator>
 
-    @State private var isFadeInTransitionUsing: Bool = false
-
     var body: some View {
         TCARouter(store) { screen in
             SwitchStore(screen) {
