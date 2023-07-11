@@ -24,7 +24,7 @@ let targets: [Target] = [
                 "Sources/**",
             ],
             resources: [
-                "Resources/**",
+                .glob(pattern: "Resources/**", excluding: ["**/GoogleService-Info.plist.encrypted"]),
             ],
             dependencies: [
                 .external(name: "ComposableArchitecture"),
