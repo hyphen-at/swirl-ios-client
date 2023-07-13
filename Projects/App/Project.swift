@@ -20,7 +20,7 @@ let targets: [Target] = [
                         "UIApplicationSupportsMultipleScenes": false,
                         "UISceneConfigurations": [],
                     ],
-                    "UIUserInterfaceStyle": "Dark",
+                    "UIUserInterfaceStyle": "Light",
                     "UISupportedInterfaceOrientations": [
                         "UIInterfaceOrientationPortrait",
                     ],
@@ -49,9 +49,5 @@ let project: Project = .makeModule(
     name: "swirl",
     targets: targets,
     resourceSynthesizers: [.assets()],
-    settings: .settings(
-        base: [
-            "OTHER_LDFLAGS": "-ObjC",
-        ]
-    )
+    settings: appCommonSettings
 )

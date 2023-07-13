@@ -17,5 +17,6 @@ let project = Project.makeModule(
             )
         ),
     ],
-    resourceSynthesizers: [.assets(), .strings()]
+    resourceSynthesizers: [.assets(), .strings()],
+    settings: moduleCommonSettings
 )
