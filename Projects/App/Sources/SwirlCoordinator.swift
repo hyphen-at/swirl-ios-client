@@ -1,9 +1,10 @@
 import ComposableArchitecture
+import SwirlSignInFeature
 import TCACoordinators
 
 struct SwirlCoordinator: ReducerProtocol {
     struct State: Equatable, IndexedRouterState {
-        var routes: [Route<SwirlRoot.State>] = [.root(.sample(.init()), embedInNavigationView: true)]
+        var routes: [Route<SwirlRoot.State>] = [.root(.signIn(.init()), embedInNavigationView: true)]
     }
 
     enum Action: IndexedRouterAction {

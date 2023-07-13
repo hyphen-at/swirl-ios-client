@@ -16,6 +16,7 @@ let project = Project.makeModule(
                 dependencies: [
                     .external(name: "ComposableArchitecture"),
                     .external(name: "Dependencies"),
+                    .shared(implements: .DesignSystem),
                 ]
             )
         ),

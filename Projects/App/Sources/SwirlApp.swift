@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import Feature
 import SwiftUI
 import TCACoordinators
 
@@ -9,11 +10,11 @@ struct SwirlApp: View {
         TCARouter(store) { screen in
             SwitchStore(screen) {
                 switch $0 {
-                case .sample:
+                case .signIn:
                     CaseLet(
-                        state: /SwirlRoot.State.sample,
-                        action: SwirlRoot.Action.sample,
-                        then: SampleScreen.init
+                        state: /SwirlRoot.State.signIn,
+                        action: SwirlRoot.Action.signIn,
+                        then: SignInScreen.init
                     )
                 }
             }
