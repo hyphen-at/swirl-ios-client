@@ -24,13 +24,24 @@ let targets: [Target] = [
                     "UISupportedInterfaceOrientations": [
                         "UIInterfaceOrientationPortrait",
                     ],
+                    "UIAppFonts": [
+                        "PPObjectSans-Bold.otf",
+                        "PPObjectSans-Medium.otf",
+                    ],
                 ]
             ),
             sources: [
                 "Sources/**",
             ],
             resources: [
-                .glob(pattern: "Resources/**", excluding: ["**/GoogleService-Info.plist.encrypted"]),
+                .glob(
+                    pattern: "Resources/**",
+                    excluding: [
+                        "**/GoogleService-Info.plist.encrypted",
+                        "**/PPObjectSans-Bold.otf.encrypted",
+                        "**/PPObjectSans-Medium.otf.encrypted",
+                    ]
+                ),
             ],
             entitlements: "Swirl.entitlements",
             dependencies: [
