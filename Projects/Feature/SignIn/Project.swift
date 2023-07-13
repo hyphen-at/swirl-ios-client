@@ -8,12 +8,12 @@ let project = Project.makeModule(
         .feature(
             implements: .SignIn,
             factory: .init(
-                product: .framework,
                 productName: "SwirlSignInFeature",
                 resources: [
                     "Resources/**",
                 ],
                 dependencies: [
+                    .external(name: "SwiftUIIntrospect"),
                     .external(name: "ComposableArchitecture"),
                     .external(name: "Dependencies"),
                     .shared(implements: .DesignSystem),
