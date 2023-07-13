@@ -38,6 +38,8 @@ let targets: [Target] = [
                 .external(name: "HyphenAuthenticate"),
                 .external(name: "TCACoordinators"),
                 .core,
+                .shared,
+                .feature,
             ]
         )
     ),

@@ -21,7 +21,7 @@ public extension ModulePath {
 
 public extension ModulePath {
     enum Feature: String, CaseIterable {
-        case empty
+        case SignIn
 
         public static let name: String = "Feature"
     }
@@ -41,7 +41,7 @@ public extension ModulePath {
 
 public extension ModulePath {
     enum Shared: String, CaseIterable {
-        case empty
+        case DesignSystem
 
         public static let name: String = "Shared"
     }
