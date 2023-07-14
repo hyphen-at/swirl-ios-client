@@ -2,10 +2,12 @@ import SwiftUI
 
 public struct SwirlButton: View {
     let label: String
+    let fontSize: Int
     let onClick: () -> Void
 
-    public init(label: String, onClick: @escaping () -> Void) {
+    public init(label: String, fontSize: Int = 16, onClick: @escaping () -> Void) {
         self.label = label
+        self.fontSize = fontSize
         self.onClick = onClick
     }
 
@@ -14,7 +16,7 @@ public struct SwirlButton: View {
             HStack(spacing: 0) {
                 Spacer()
                 Text(label)
-                    .font(.system(size: 16))
+                    .font(.system(size: CGFloat(fontSize)))
                     .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
                 Spacer()
             }
