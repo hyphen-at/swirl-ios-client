@@ -13,10 +13,12 @@ let project = Project.makeModule(
                 resources: [
                     "Resources/**",
                 ],
-                dependencies: []
+                dependencies: [
+                    .external(name: "SnapKit-Dynamic"),
+                ]
             )
         ),
     ],
     resourceSynthesizers: [.assets(), .strings()],
-    settings: moduleCommonSettings
+    settings: moduleCommonSettingsWithDesignSystemBridgingHeader
 )
