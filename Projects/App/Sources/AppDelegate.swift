@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import HyphenAuthenticate
+import HyphenCore
 import SwiftUI
 import UIKit
 
@@ -25,6 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.rootViewController = viewController
         window?.makeKeyAndVisible()
 
+        Hyphen.shared.appSecret = "iuw1jf5k6j2y0y5iz36xakbii4dkkktledplmuj83380"
         HyphenAuthenticateAppDelegate.shared.application(application)
 
         return true
