@@ -22,6 +22,12 @@ struct SwirlApp: View {
                         action: SwirlRoot.Action.signInConfirmation,
                         then: SignInConfirmationScreen.init
                     )
+                case .makeProfile:
+                    CaseLet(
+                        state: /SwirlRoot.State.makeProfile,
+                        action: SwirlRoot.Action.makeProfile,
+                        then: MakeProfileScreen.init
+                    )
                 }
             }
         }

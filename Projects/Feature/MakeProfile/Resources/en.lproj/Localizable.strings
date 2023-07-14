@@ -1,0 +1,13 @@
+LETS_MAKE = "Let’s make";
+LETS_MAKE_DESCRIPTION = "Write down and make your own card\nto SWIRL with the others!";
+
+MAKE_PROFILE_NICKNAME = "Nickname";
+MAKE_PROFILE_NICKNAME_PLACEHOLDER = "What’s your name? (Max. 16)";
+MAKE_PROFILE_SOCIAL_HANDLE = "Social Handle (at least 1 handle required)";
+MAKE_PROFILE_KEYWORDS = "Keywords";
+MAKE_PROFILE_KEYWORDS_DESCRIPTION = "What are your interests? (Max. 60 characters)";
+MAKE_PROFILE_PFP = "PFP (Optional)";
+MAKE_PROFILE_PFP_CTA = "+ Add Image (jpeg, png or webp)";
+
+MAKE_PROFILE = "Make my card";
+

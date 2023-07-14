@@ -11,7 +11,7 @@ public struct SignInConfirmationScreen: View {
     }
 
     public var body: some View {
-        WithViewStore(store, observe: { $0 }) { _ in
+        WithViewStore(store, observe: { $0 }) { viewStore in
             VStack(spacing: 0) {
                 HStack {
                     if let appIcon = Bundle.main.icon {
@@ -48,7 +48,9 @@ public struct SignInConfirmationScreen: View {
                 Spacer()
                 SwirlButton(
                     label: SwirlSignInFeatureStrings.accessErrorDeviceButton,
-                    onClick: {}
+                    onClick: {
+                        viewStore.send(.close)
+                    }
                 )
                 .padding(.horizontal, 16)
                 Button(action: {}) {

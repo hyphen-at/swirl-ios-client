@@ -18,6 +18,17 @@ struct SwirlCoordinator: ReducerProtocol {
             case .routeAction(0, action: .signIn(.onContinueWithGoogleButtonClick)):
                 state.routes.presentCover(.signInConfirmation(.init()))
                 return .none
+            case .routeAction(1, action: .signInConfirmation(.close)):
+                state.routes.dismiss()
+
+                return .run { [state = state] dispatch in
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+
+                    var newRoutes = state.routes
+                    newRoutes.push(.makeProfile(.init()))
+
+                    await dispatch(.updateRoutes(newRoutes))
+                }
             default:
                 return .none
             }

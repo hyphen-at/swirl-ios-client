@@ -6,7 +6,9 @@ public struct SignInConfirmation: ReducerProtocol {
         public init() {}
     }
 
-    public enum Action {}
+    public enum Action {
+        case close
+    }
 
     public var body: some ReducerProtocol<State, Action> {
         Reduce { _, action in

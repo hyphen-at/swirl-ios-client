@@ -1,1 +1,2 @@
+@_exported import SwirlMakeProfileFeature
 @_exported import SwirlSignInFeature

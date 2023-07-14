@@ -8,6 +8,7 @@ let targets: [Target] = [
             name: "SwirlFeature",
             product: .staticLibrary,
             dependencies: [
+                .feature(implements: .MakeProfile),
                 .feature(implements: .SignIn),
             ]
         )

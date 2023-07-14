@@ -2,3 +2,5 @@ YOU_MET_AT = "You meet at";
 
 LOGIN_APPLE = "Continue with Apple";
 LOGIN_GOOGLE = "Continue with Google";
+
+EDIT = "Edit";
