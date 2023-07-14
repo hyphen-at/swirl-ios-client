@@ -28,6 +28,12 @@ struct SwirlApp: View {
                         action: SwirlRoot.Action.makeProfile,
                         then: MakeProfileScreen.init
                     )
+                case .nameCardList:
+                    CaseLet(
+                        state: /SwirlRoot.State.nameCardList,
+                        action: SwirlRoot.Action.nameCardList,
+                        then: NameCardListScreen.init
+                    )
                 }
             }
         }

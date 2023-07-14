@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import SwiftUI
+import SwiftUIIntrospect
 import SwirlDesignSystem
 
 public struct MakeProfileScreen: View {
@@ -76,7 +77,9 @@ public struct MakeProfileScreen: View {
 
                 Spacer()
 
-                Button(action: {}) {
+                Button(action: {
+                    viewStore.send(.onMakeMyCardButtonClick)
+                }) {
                     HStack(alignment: .center, spacing: 10) {
                         Text(SwirlMakeProfileFeatureStrings.makeProfile)
                             .font(Font.custom("PP Object Sans", size: 16).weight(.medium))

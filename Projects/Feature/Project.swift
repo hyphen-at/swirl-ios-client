@@ -9,6 +9,7 @@ let targets: [Target] = [
             product: .staticLibrary,
             dependencies: [
                 .feature(implements: .MakeProfile),
+                .feature(implements: .NameCardList),
                 .feature(implements: .SignIn),
             ]
         )

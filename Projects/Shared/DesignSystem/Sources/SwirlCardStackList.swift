@@ -17,7 +17,7 @@ public struct SwirlCardStackView: UIViewControllerRepresentable {
         stackedLayout.movingItemOnTop = true
         stackedLayout.topReveal = 80
         stackedLayout.itemSize = CGSize(width: 0, height: 250)
-        stackedLayout.layoutMargin = .init(top: 90, left: 16, bottom: 120, right: 16)
+        stackedLayout.layoutMargin = .init(top: 00, left: 16, bottom: 120, right: 16)
 
         return SwirlCardStackViewController(collectionViewLayout: stackedLayout)
     }

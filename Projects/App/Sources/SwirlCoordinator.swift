@@ -29,6 +29,9 @@ struct SwirlCoordinator: ReducerProtocol {
 
                     await dispatch(.updateRoutes(newRoutes))
                 }
+            case .routeAction(1, action: .makeProfile(.onMakeMyCardButtonClick)):
+                state.routes.push(.nameCardList(.init()))
+                return .none
             default:
                 return .none
             }

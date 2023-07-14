@@ -32,7 +32,7 @@ public struct MakeProfile: ReducerProtocol {
         case updateKeywords(String)
         case updatePfpImage(UIImage?)
 
-        case close
+        case onMakeMyCardButtonClick
     }
 
     public var body: some ReducerProtocol<State, Action> {
