@@ -21,6 +21,7 @@ public struct SwirlTextField: View {
             text: $text,
             prompt: Text(placeHolder).font(.system(size: 12))
         )
+        .autocorrectionDisabled(true)
         .lineLimit(lineLimit)
         .padding(.horizontal, 12)
         .padding(.vertical, lineLimit > 1 ? 12 : 0)
