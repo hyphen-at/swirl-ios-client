@@ -6,6 +6,7 @@ public struct SwirlNameCard: View {
     let date: Date
     let location: String
     let color: Color
+    let enablePressAnimation: Bool
     let onClick: () -> Void
 
     public init(
@@ -14,6 +15,7 @@ public struct SwirlNameCard: View {
         date: Date,
         location: String,
         color: Color,
+        enablePressAnimation: Bool = true,
         onClick: @escaping () -> Void
     ) {
         self.name = name
@@ -21,6 +23,7 @@ public struct SwirlNameCard: View {
         self.date = date
         self.location = location
         self.color = color
+        self.enablePressAnimation = enablePressAnimation
         self.onClick = onClick
     }
 
@@ -73,10 +76,10 @@ public struct SwirlNameCard: View {
             .clipShape(CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight]))
             .offset(x: press ? -1 : -4, y: press ? -1 : -4)
             .gesture(
-                LongPressGesture(minimumDuration: 5, maximumDistance: 50)
+                enablePressAnimation ? LongPressGesture(minimumDuration: 5, maximumDistance: 50)
                     .updating($press) { currentState, gestureState, _ in
                         gestureState = currentState
-                    }
+                    } : nil
             )
             .animation(.easeInOut, value: press)
         }
@@ -128,7 +131,7 @@ private struct SwirlNameCardContent: View {
         .customCornerRadius(24, corners: [.topRight, .bottomLeft, .bottomRight])
         .overlay(
             CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight])
-                .stroke(.black, lineWidth: 1)
+                .stroke(.black, lineWidth: 2)
         )
     }
 }
