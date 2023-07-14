@@ -1,3 +1,8 @@
 SLOGAN = "Meet, greet and\nkeep your memory in real life";
 
 RECOVER = "Recover my account";
+
+CHECK_YOUR_DEVICE = "Check your %@";
+CHECK_YOUR_DEVICE_DESCRIPTION = "For signing in to SWIRL, you need to approve the key access in your %@.";
+ACCESS_ERROR_DEVICE_BUTTON = "Can’t access to the device?";
+REQUIRE_AGAIN = "Require again";

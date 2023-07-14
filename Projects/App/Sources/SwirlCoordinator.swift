@@ -13,8 +13,11 @@ struct SwirlCoordinator: ReducerProtocol {
     }
 
     var body: some ReducerProtocol<State, Action> {
-        Reduce { _, action in
+        Reduce { state, action in
             switch action {
+            case .routeAction(0, action: .signIn(.onContinueWithGoogleButtonClick)):
+                state.routes.presentCover(.signInConfirmation(.init()))
+                return .none
             default:
                 return .none
             }

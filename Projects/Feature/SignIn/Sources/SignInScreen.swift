@@ -16,7 +16,11 @@ public struct SignInScreen: View {
     }
 
     public var body: some View {
-        WithViewStore(store, observe: { $0 }) { _ in
+        WithViewStore(store, observe: { $0 }) { viewStore in
+//            SwirlCardStackView(
+//                cardCount: .constant(10)
+//            )
+//                .edgesIgnoringSafeArea(.all)
             VStack(spacing: 0) {
                 SwirlDesignSystemAsset.Images.swirlTextLogo.swiftUIImage
                     .resizable()
@@ -30,6 +34,7 @@ public struct SignInScreen: View {
                     color: randomColor,
                     onClick: {}
                 )
+                .shadow(radius: 2)
                 .padding(.top, 58)
                 .padding(.horizontal, 32)
                 .allowsHitTesting(false)
@@ -42,8 +47,10 @@ public struct SignInScreen: View {
                     .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
                     .padding(.top, 40)
                 Spacer()
-                SwirlLoginButton(loginMethod: .google) {}
-                    .padding(.horizontal, 24)
+                SwirlLoginButton(loginMethod: .google) {
+                    viewStore.send(.onContinueWithGoogleButtonClick)
+                }
+                .padding(.horizontal, 24)
                 SwirlLoginButton(loginMethod: .apple) {}
                     .padding(.horizontal, 24)
                     .padding(.top, 12)
@@ -69,14 +76,14 @@ public struct SignInScreen: View {
             randomDate = SwirlSignInFeature.randomDate()
             randomLocation = SwirlSignInFeature.randomLocation()
             randomName = SwirlSignInFeature.randomFakeFirstName()
-            randomColor = SwirlSignInFeature.generateRandomPastelColor(withMixedColor: nil)
+            randomColor = Color(hue: Double.random(in: 0 ... 1), saturation: 0.62, brightness: 1)
 
-            Timer.scheduledTimer(withTimeInterval: 2.5, repeats: true) { _ in
+            Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
                 withAnimation {
                     randomDate = SwirlSignInFeature.randomDate()
                     randomLocation = SwirlSignInFeature.randomLocation()
                     randomName = SwirlSignInFeature.randomFakeFirstName()
-                    randomColor = SwirlSignInFeature.generateRandomPastelColor(withMixedColor: nil)
+                    randomColor = Color(hue: Double.random(in: 0 ... 1), saturation: 0.62, brightness: 1)
                 }
             }
         }

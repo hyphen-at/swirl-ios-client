@@ -16,6 +16,12 @@ struct SwirlApp: View {
                         action: SwirlRoot.Action.signIn,
                         then: SignInScreen.init
                     )
+                case .signInConfirmation:
+                    CaseLet(
+                        state: /SwirlRoot.State.signInConfirmation,
+                        action: SwirlRoot.Action.signInConfirmation,
+                        then: SignInConfirmationScreen.init
+                    )
                 }
             }
         }
