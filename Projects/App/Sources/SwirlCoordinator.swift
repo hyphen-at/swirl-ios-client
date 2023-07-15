@@ -4,7 +4,7 @@ import TCACoordinators
 
 struct SwirlCoordinator: ReducerProtocol {
     struct State: Equatable, IndexedRouterState {
-        var routes: [Route<SwirlRoot.State>] = [.root(.nameCardList(.init()), embedInNavigationView: true)]
+        var routes: [Route<SwirlRoot.State>] = [.root(.signIn(.init()), embedInNavigationView: true)]
     }
 
     enum Action: IndexedRouterAction {
@@ -15,9 +15,9 @@ struct SwirlCoordinator: ReducerProtocol {
     var body: some ReducerProtocol<State, Action> {
         Reduce { state, action in
             switch action {
-            case .routeAction(_, action: .signIn(.onContinueWithGoogleButtonClick)):
-                state.routes.presentCover(.signInConfirmation(.init()))
-                return .none
+//            case .routeAction(_, action: .signIn(.onContinueWithGoogleButtonClick)):
+//                state.routes.presentCover(.signInConfirmation(.init()))
+//                return .none
             case .routeAction(_, action: .signInConfirmation(.close)):
                 state.routes.dismiss()
 

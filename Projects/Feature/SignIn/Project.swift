@@ -16,6 +16,7 @@ let project = Project.makeModule(
                     .external(name: "SwiftUIIntrospect"),
                     .external(name: "ComposableArchitecture"),
                     .external(name: "Dependencies"),
+                    .core(implements: .Auth),
                     .shared(implements: .DesignSystem),
                 ]
             )

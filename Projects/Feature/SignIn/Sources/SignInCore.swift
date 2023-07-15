@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import Dependencies
+import SwirlAuth
 
 public struct SignIn: ReducerProtocol {
     public struct State: Equatable {
@@ -10,11 +11,15 @@ public struct SignIn: ReducerProtocol {
         case onContinueWithGoogleButtonClick
     }
 
+    @Dependency(\.swirlAuthClient) var authClient
+
     public var body: some ReducerProtocol<State, Action> {
         Reduce { _, action in
             switch action {
             case .onContinueWithGoogleButtonClick:
-                return .none
+                return .run { _ in
+                    try await authClient.signInWithGoogle()
+                }
             }
         }
     }
