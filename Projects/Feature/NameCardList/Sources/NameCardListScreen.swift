@@ -67,10 +67,53 @@ public struct NameCardListScreen: View {
                         )
                         .padding(.bottom, 12)
                     }
+                    .opacity(isShakeEnabled ? 0 : 1)
                 }
 
-                Text(deviceInteractor.message)
-                    .background(.white)
+                if isShakeEnabled {
+                    VStack(spacing: 0) {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            Text(SwirlNameCardListFeatureStrings.readyToSwirl)
+                                .font(Font.custom("PP Object Sans", size: 28).weight(.medium))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                            Spacer()
+                        }
+                        SwirlNameCard(
+                            profile: viewStore.profiles.first!,
+                            isMyProfile: true,
+                            onClick: {}
+                        )
+                        .padding(.top, 60)
+                        .padding(.horizontal, 12)
+                        Button(action: {
+                            isShakeEnabled = false
+
+                            let generator = UINotificationFeedbackGenerator()
+                            generator.notificationOccurred(.success)
+                        }) {
+                            SwirlNameCardListFeatureAsset.xButton.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 44)
+                        }
+                        .padding(.top, 156)
+                        Spacer()
+                    }
+                    .background(
+                        Color(red: 0.43, green: 0.95, blue: 0.91)
+                            .opacity(0.3)
+                    )
+                    .edgesIgnoringSafeArea(.all)
+                    .onAppear {
+                        let generator = UINotificationFeedbackGenerator()
+                        generator.notificationOccurred(.success)
+
+                        deviceInteractor.startup()
+                    }
+                }
             }
             .onAppear {
                 viewStore.send(.loading)
@@ -81,10 +124,9 @@ public struct NameCardListScreen: View {
                 }
 
                 isShakeEnabled = true
-
-                deviceInteractor.startup()
             }
             .animation(.easeInOut, value: viewStore.isLoading)
+            .animation(.easeInOut, value: isShakeEnabled)
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)

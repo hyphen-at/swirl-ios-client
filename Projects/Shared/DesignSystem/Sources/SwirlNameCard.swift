@@ -111,7 +111,7 @@ private struct SwirlNameCardContent: View {
                     .padding(.horizontal, 16)
                 Spacer()
             }
-            .padding(.bottom, 66)
+            .padding(.bottom, 89)
             .opacity(isMyProfile ? 1.0 : 0.0)
             VStack(spacing: 2) {
                 HStack(spacing: 0) {
