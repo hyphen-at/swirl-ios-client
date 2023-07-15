@@ -1,3 +1,4 @@
 @_exported import SwirlMakeProfileFeature
+@_exported import SwirlNameCardDetailFeature
 @_exported import SwirlNameCardListFeature
 @_exported import SwirlSignInFeature

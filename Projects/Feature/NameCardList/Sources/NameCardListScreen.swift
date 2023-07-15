@@ -2,6 +2,7 @@ import ComposableArchitecture
 import SwiftUI
 import SwiftUIIntrospect
 import SwirlDesignSystem
+import SwirlModel
 
 public struct NameCardListScreen: View {
     let store: StoreOf<NameCardList>
@@ -37,7 +38,12 @@ public struct NameCardListScreen: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 13)
 
-                        SwirlCardStackView(cardCount: .constant(4))
+                        SwirlCardStackView(
+                            profiles: .constant(viewStore.profiles),
+                            onNameCardClick: { profile in
+                                viewStore.send(.onNameCardClick(profile: profile))
+                            }
+                        )
 
                         Button(action: {}) {
                             HStack(alignment: .center, spacing: 10) {

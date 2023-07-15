@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import SwirlMakeProfileFeature
+import SwirlNameCardDetailFeature
 import SwirlNameCardListFeature
 import SwirlSignInFeature
 
@@ -9,6 +10,7 @@ struct SwirlRoot: ReducerProtocol {
         case signInConfirmation(SignInConfirmation.State)
         case makeProfile(MakeProfile.State)
         case nameCardList(NameCardList.State)
+        case nameCardDetail(NameCardDetail.State)
     }
 
     enum Action {
@@ -16,6 +18,7 @@ struct SwirlRoot: ReducerProtocol {
         case signInConfirmation(SignInConfirmation.Action)
         case makeProfile(MakeProfile.Action)
         case nameCardList(NameCardList.Action)
+        case nameCardDetail(NameCardDetail.Action)
     }
 
     var body: some ReducerProtocol<State, Action> {
@@ -30,6 +33,9 @@ struct SwirlRoot: ReducerProtocol {
         }
         Scope(state: /State.nameCardList, action: /Action.nameCardList) {
             NameCardList()
+        }
+        Scope(state: /State.nameCardDetail, action: /Action.nameCardDetail) {
+            NameCardDetail()
         }
     }
 }

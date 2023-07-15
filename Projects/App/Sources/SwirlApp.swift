@@ -34,6 +34,12 @@ struct SwirlApp: View {
                         action: SwirlRoot.Action.nameCardList,
                         then: NameCardListScreen.init
                     )
+                case .nameCardDetail:
+                    CaseLet(
+                        state: /SwirlRoot.State.nameCardDetail,
+                        action: SwirlRoot.Action.nameCardDetail,
+                        then: NameCardDetailScreen.init
+                    )
                 }
             }
         }

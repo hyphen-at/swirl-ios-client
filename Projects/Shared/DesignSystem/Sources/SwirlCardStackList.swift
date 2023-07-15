@@ -1,14 +1,18 @@
 import Foundation
 import SnapKit
 import SwiftUI
+import SwirlModel
 
 public struct SwirlCardStackView: UIViewControllerRepresentable {
-    @Binding private var cardCount: Int
+    @Binding private var profiles: [SwirlProfile]
+    private var onNameCardClick: (SwirlProfile) -> Void
 
     public init(
-        cardCount: Binding<Int>
+        profiles: Binding<[SwirlProfile]>,
+        onNameCardClick: @escaping (SwirlProfile) -> Void
     ) {
-        _cardCount = cardCount
+        _profiles = profiles
+        self.onNameCardClick = onNameCardClick
     }
 
     public func makeUIViewController(context _: Context) -> SwirlCardStackViewController {
@@ -17,21 +21,26 @@ public struct SwirlCardStackView: UIViewControllerRepresentable {
         stackedLayout.movingItemOnTop = true
         stackedLayout.topReveal = 80
         stackedLayout.itemSize = CGSize(width: 0, height: 250)
-        stackedLayout.layoutMargin = .init(top: 00, left: 16, bottom: 120, right: 16)
+        stackedLayout.layoutMargin = .init(top: 0, left: 8, bottom: 120, right: 8)
 
-        return SwirlCardStackViewController(collectionViewLayout: stackedLayout)
+        let viewController = SwirlCardStackViewController(collectionViewLayout: stackedLayout)
+        viewController.onNameCardClick = onNameCardClick
+
+        return viewController
     }
 
     public func updateUIViewController(_ viewController: SwirlCardStackViewController, context _: Context) {
-        viewController.updateCardCount(cardCount)
+        viewController.updateProfileList(profiles)
     }
 }
 
 public class SwirlCardStackViewController: TGLStackedViewController {
-    private var cardCount: Int = 3
+    private var profiles: [SwirlProfile] = []
 
-    public func updateCardCount(_ count: Int) {
-        cardCount = count
+    public var onNameCardClick: (SwirlProfile) -> Void = { _ in }
+
+    public func updateProfileList(_ profiles: [SwirlProfile]) {
+        self.profiles = profiles
         collectionView.reloadData()
     }
 
@@ -52,46 +61,52 @@ public class SwirlCardStackViewController: TGLStackedViewController {
     // MARK: - UICollectionViewDataSource protocol
 
     override public func collectionView(_: UICollectionView, numberOfItemsInSection _: Int) -> Int {
-        return cardCount
+        return profiles.count
     }
 
     override public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SwirlCardStackCell.reuseIdentifier, for: indexPath) as! SwirlCardStackCell
-
+        cell.profile = profiles[indexPath.item]
         return cell
+    }
+
+    override public func collectionView(_: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        onNameCardClick(profiles[indexPath.item])
     }
 }
 
 struct SwirlCardStackCellWrapper: View {
-    @State var name: String = ""
-    @State var date: Date = .init()
-    @State var location: String = ""
-    @State var color: Color = .clear
+    let profile: SwirlProfile?
 
     var body: some View {
-        SwirlNameCard(
-            name: name,
-            profileUrl: "",
-            date: date,
-            location: location,
-            color: color,
-            enablePressAnimation: false,
-            onClick: {}
-        )
-        .shadow(radius: 2)
-        .onAppear {
-            date = randomDate()
-            location = randomLocation()
-            name = randomFakeFirstName()
-            color = Color(hue: Double.random(in: 0 ... 1), saturation: 0.62, brightness: 1)
+        if let profile = profile {
+            SwirlNameCard(
+                profile: profile,
+                enablePressAnimation: false,
+                onClick: {}
+            )
+            .shadow(radius: 2)
+        } else {
+            EmptyView()
         }
     }
 }
 
 class SwirlCardStackCell: UICollectionViewCell {
+    private var _profile: SwirlProfile? = nil
+    public var profile: SwirlProfile? {
+        set {
+            _profile = newValue
+            host.rootView = SwirlCardStackCellWrapper(profile: _profile)
+        }
+        get {
+            _profile
+        }
+    }
+
     static var reuseIdentifier = "SwirlCardStackCell"
 
-    lazy var host: UIHostingController = .init(rootView: SwirlCardStackCellWrapper())
+    lazy var host: UIHostingController = .init(rootView: SwirlCardStackCellWrapper(profile: _profile))
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -120,38 +135,6 @@ class SwirlCardStackCell: UICollectionViewCell {
             host.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
         ])
     }
-}
-
-func randomFakeFirstName() -> String {
-    let firstNameList = ["Henry", "William", "Geoffrey", "Jim", "Yvonne", "Jamie", "Leticia", "Priscilla", "Sidney", "Nancy", "Edmund", "Bill", "Megan"]
-    return firstNameList.randomElement()!
-}
-
-func randomLocation() -> String {
-    let locations = [
-        "LA, United States",
-        "NYC, United States",
-        "Chicago, United States",
-        "San Francisco, United States",
-        "Miami, United States",
-        "Seattle, United States",
-        "Austin, United States",
-        "Las Vegas, United States",
-        "Orlando, United States",
-        "Denver, United States",
-        "Boston, United States",
-        "Philadelphia, United States",
-        "San Diego, United States",
-        "Nashville, United States",
-        "Dallas, United States",
-        "Portland, United States",
-        "Atlanta, United States",
-        "Phoenix, United States",
-        "Detroit, United States",
-        "New Orleans, United States",
-    ]
-
-    return locations.randomElement()!
 }
 
 func randomDate() -> Date {

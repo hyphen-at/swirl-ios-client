@@ -4,7 +4,7 @@ import TCACoordinators
 
 struct SwirlCoordinator: ReducerProtocol {
     struct State: Equatable, IndexedRouterState {
-        var routes: [Route<SwirlRoot.State>] = [.root(.signIn(.init()), embedInNavigationView: true)]
+        var routes: [Route<SwirlRoot.State>] = [.root(.nameCardList(.init()), embedInNavigationView: true)]
     }
 
     enum Action: IndexedRouterAction {
@@ -15,10 +15,10 @@ struct SwirlCoordinator: ReducerProtocol {
     var body: some ReducerProtocol<State, Action> {
         Reduce { state, action in
             switch action {
-            case .routeAction(0, action: .signIn(.onContinueWithGoogleButtonClick)):
+            case .routeAction(_, action: .signIn(.onContinueWithGoogleButtonClick)):
                 state.routes.presentCover(.signInConfirmation(.init()))
                 return .none
-            case .routeAction(1, action: .signInConfirmation(.close)):
+            case .routeAction(_, action: .signInConfirmation(.close)):
                 state.routes.dismiss()
 
                 return .run { [state = state] dispatch in
@@ -29,8 +29,11 @@ struct SwirlCoordinator: ReducerProtocol {
 
                     await dispatch(.updateRoutes(newRoutes))
                 }
-            case .routeAction(1, action: .makeProfile(.onMakeMyCardButtonClick)):
+            case .routeAction(_, action: .makeProfile(.onMakeMyCardButtonClick)):
                 state.routes.push(.nameCardList(.init()))
+                return .none
+            case let .routeAction(_, action: .nameCardList(.onNameCardClick(profile: profile))):
+                state.routes.presentSheet(.nameCardDetail(.init(profile: profile)))
                 return .none
             default:
                 return .none

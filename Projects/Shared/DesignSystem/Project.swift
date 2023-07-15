@@ -15,6 +15,7 @@ let project = Project.makeModule(
                 ],
                 dependencies: [
                     .external(name: "SnapKit-Dynamic"),
+                    .shared(implements: .Model),
                 ]
             )
         ),

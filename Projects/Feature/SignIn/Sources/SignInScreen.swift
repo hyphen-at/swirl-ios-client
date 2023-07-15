@@ -2,6 +2,7 @@ import ComposableArchitecture
 import SwiftUI
 import SwiftUIIntrospect
 import SwirlDesignSystem
+import SwirlModel
 
 public struct SignInScreen: View {
     let store: StoreOf<SignIn>
@@ -17,21 +18,19 @@ public struct SignInScreen: View {
 
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-//            SwirlCardStackView(
-//                cardCount: .constant(10)
-//            )
-//                .edgesIgnoringSafeArea(.all)
             VStack(spacing: 0) {
                 SwirlDesignSystemAsset.Images.swirlTextLogo.swiftUIImage
                     .resizable()
                     .frame(width: 147, height: 55)
                     .padding(.top, 64)
                 SwirlNameCard(
-                    name: randomName,
-                    profileUrl: "",
-                    date: randomDate,
-                    location: randomLocation,
-                    color: randomColor,
+                    profile: SwirlProfile(
+                        nickname: randomName,
+                        profileImage: "",
+                        keywords: [""],
+                        color: randomColor.toHex()!,
+                        socialHandles: []
+                    ),
                     onClick: {}
                 )
                 .shadow(radius: 2)

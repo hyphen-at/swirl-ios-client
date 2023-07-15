@@ -3,12 +3,12 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project.makeModule(
-    name: ModulePath.Feature.name + ModulePath.Feature.NameCardList.rawValue,
+    name: ModulePath.Feature.name + ModulePath.Feature.NameCardDetail.rawValue,
     targets: [
         .feature(
-            implements: .NameCardList,
+            implements: .NameCardDetail,
             factory: .init(
-                productName: "SwirlNameCardListFeature",
+                productName: "SwirlNameCardDetailFeature",
                 resources: [
                     "Resources/**",
                 ],
@@ -16,6 +16,7 @@ let project = Project.makeModule(
                     .external(name: "SwiftUIIntrospect"),
                     .external(name: "ComposableArchitecture"),
                     .external(name: "Dependencies"),
+                    .external(name: "NetworkImage"),
                     .shared(implements: .DesignSystem),
                     .shared(implements: .Model),
                 ]

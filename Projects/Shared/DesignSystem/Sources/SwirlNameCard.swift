@@ -1,34 +1,24 @@
 import SwiftUI
+import SwirlModel
 
 public struct SwirlNameCard: View {
-    let name: String
-    let profileUrl: String
-    let date: Date
-    let location: String
-    let color: Color
+    let profile: SwirlProfile
     let enablePressAnimation: Bool
     let onClick: () -> Void
 
     public init(
-        name: String,
-        profileUrl: String,
-        date: Date,
-        location: String,
-        color: Color,
+        profile: SwirlProfile,
         enablePressAnimation: Bool = true,
         onClick: @escaping () -> Void
     ) {
-        self.name = name
-        self.profileUrl = profileUrl
-        self.date = date
-        self.location = location
-        self.color = color
+        self.profile = profile
         self.enablePressAnimation = enablePressAnimation
         self.onClick = onClick
     }
 
     @GestureState private var press: Bool = false
     @State private var isButtonPressed: Bool = false
+    @State private var date: Date = randomDate()
 
     public var body: some View {
         ZStack {
@@ -57,20 +47,20 @@ public struct SwirlNameCard: View {
             }
 
             SwirlNameCardContent(
-                name: name,
-                profileUrl: profileUrl,
+                name: profile.nickname,
+                profileUrl: profile.profileImage,
                 formattedTime: formattedTime,
-                location: location
+                location: ""
             )
-            .background(color)
+            .background(Color(hex: profile.color))
             .clipShape(CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight]))
             .offset(x: 4, y: 4)
 
             SwirlNameCardContent(
-                name: name,
-                profileUrl: profileUrl,
+                name: profile.nickname,
+                profileUrl: profile.profileImage,
                 formattedTime: formattedTime,
-                location: location
+                location: ""
             )
             .background(.white)
             .clipShape(CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight]))
@@ -139,12 +129,27 @@ private struct SwirlNameCardContent: View {
 #if DEBUG
     struct SwirlNameCard_Previews: PreviewProvider {
         static var previews: some View {
+            var profile: SwirlProfile {
+                let mockSocialHandles = [
+                    SwirlProfile.SocialHandle(channel: "twitter", handle: "@helloworld"),
+                    SwirlProfile.SocialHandle(channel: "discord", handle: "helloworld"),
+                    SwirlProfile.SocialHandle(channel: "telegram", handle: "helloworld"),
+                    SwirlProfile.SocialHandle(channel: "threads", handle: "hihi.world"),
+                ]
+
+                let mockUser = SwirlProfile(
+                    nickname: "HelloAlice",
+                    profileImage: "https://...",
+                    keywords: ["aa", "Blockchain", "loves", "you"],
+                    color: "#deadbe",
+                    socialHandles: mockSocialHandles
+                )
+
+                return mockUser
+            }
+
             SwirlNameCard(
-                name: "Daniel",
-                profileUrl: "",
-                date: Date(),
-                location: "LA, United States",
-                color: Color(red: 0.93, green: 0.42, blue: 0.41),
+                profile: profile,
                 onClick: {}
             )
             .padding()

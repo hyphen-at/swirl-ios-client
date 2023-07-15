@@ -1,0 +1,6 @@
+SOCIAL_HANDLES = "Social Handles";
+YOUR_MEMORIES = "Your memory with %@";
+LOCATION = "Location";
+FLOWSCAN_TITLE = "Show off\nthat you met %@";
+FLOWSCAN_SUBTITLE = "A Moment SBT,\nverified by Proof-of-Location,\nis minted to both of your accounts.";
+FLOWSCAN_CTA = "View on Flowscan";

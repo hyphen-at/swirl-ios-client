@@ -10,6 +10,7 @@ let targets: [Target] = [
             dependencies: [
                 .feature(implements: .MakeProfile),
                 .feature(implements: .NameCardList),
+                .feature(implements: .NameCardDetail),
                 .feature(implements: .SignIn),
             ]
         )
