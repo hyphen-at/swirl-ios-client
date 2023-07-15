@@ -28,6 +28,11 @@ let targets: [Target] = [
                         "PPObjectSans-Bold.otf",
                         "PPObjectSans-Medium.otf",
                     ],
+                    "NSBluetoothAlwaysUsageDescription": "Use to share the SWIRL Name Card.",
+                    "NSLocalNetworkUsageDescription": "Use this permission to locate the neighboring SWIRL user.",
+                    "NSNearbyInteractionAllowOnceUsageDescription": "Use to share the SWIRL Name Card.",
+                    "NSNearbyInteractionUsageDescription": "Use to share the SWIRL Name Card.",
+                    "NSBonjourServices": ["_248FAD1DE957._tcp", "_swirl._tcp"],
                 ]
             ),
             sources: [

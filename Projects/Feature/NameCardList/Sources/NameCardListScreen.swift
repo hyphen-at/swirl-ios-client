@@ -1,4 +1,6 @@
 import ComposableArchitecture
+import MultipeerConnectivity
+import NearbyInteraction
 import SwiftUI
 import SwiftUIIntrospect
 import SwirlDesignSystem
@@ -6,6 +8,9 @@ import SwirlModel
 
 public struct NameCardListScreen: View {
     let store: StoreOf<NameCardList>
+
+    @State private var isShakeEnabled = false
+    @StateObject private var deviceInteractor: SwirlDeviceInteractor = .init()
 
     public init(
         store: StoreOf<NameCardList>
@@ -63,9 +68,21 @@ public struct NameCardListScreen: View {
                         .padding(.bottom, 12)
                     }
                 }
+
+                Text(deviceInteractor.message)
+                    .background(.white)
             }
             .onAppear {
                 viewStore.send(.loading)
+            }
+            .onShake {
+                if isShakeEnabled {
+                    return
+                }
+
+                isShakeEnabled = true
+
+                deviceInteractor.startup()
             }
             .animation(.easeInOut, value: viewStore.isLoading)
         }

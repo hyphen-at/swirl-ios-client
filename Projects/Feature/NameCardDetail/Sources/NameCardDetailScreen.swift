@@ -245,6 +245,7 @@ public struct NameCardDetailScreen: View {
                         .cornerRadius(12)
                         .shadow(color: .black.opacity(0.16), radius: 8, x: 0, y: 2)
                         .padding(.horizontal, 20)
+                        .padding(.bottom, 36)
                         Spacer()
                     }
                 }
