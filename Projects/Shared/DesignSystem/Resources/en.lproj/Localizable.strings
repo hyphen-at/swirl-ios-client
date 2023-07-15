@@ -4,3 +4,5 @@ LOGIN_APPLE = "Continue with Apple";
 LOGIN_GOOGLE = "Continue with Google";
 
 EDIT = "Edit";
+
+MY_PROFILE = "My Profile";

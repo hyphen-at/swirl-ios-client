@@ -66,6 +66,7 @@ public class SwirlCardStackViewController: TGLStackedViewController {
 
     override public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SwirlCardStackCell.reuseIdentifier, for: indexPath) as! SwirlCardStackCell
+        cell.isMyProfile = indexPath.item == 0
         cell.profile = profiles[indexPath.item]
         return cell
     }
@@ -77,11 +78,13 @@ public class SwirlCardStackViewController: TGLStackedViewController {
 
 struct SwirlCardStackCellWrapper: View {
     let profile: SwirlProfile?
+    let isMyProfile: Bool
 
     var body: some View {
         if let profile = profile {
             SwirlNameCard(
                 profile: profile,
+                isMyProfile: isMyProfile,
                 enablePressAnimation: false,
                 onClick: {}
             )
@@ -97,16 +100,23 @@ class SwirlCardStackCell: UICollectionViewCell {
     public var profile: SwirlProfile? {
         set {
             _profile = newValue
-            host.rootView = SwirlCardStackCellWrapper(profile: _profile)
+            host.rootView = SwirlCardStackCellWrapper(profile: _profile, isMyProfile: isMyProfile)
         }
         get {
             _profile
         }
     }
 
+    public var isMyProfile: Bool = false
+
     static var reuseIdentifier = "SwirlCardStackCell"
 
-    lazy var host: UIHostingController = .init(rootView: SwirlCardStackCellWrapper(profile: _profile))
+    lazy var host: UIHostingController = .init(
+        rootView: SwirlCardStackCellWrapper(
+            profile: _profile,
+            isMyProfile: isMyProfile
+        )
+    )
 
     override init(frame: CGRect) {
         super.init(frame: frame)

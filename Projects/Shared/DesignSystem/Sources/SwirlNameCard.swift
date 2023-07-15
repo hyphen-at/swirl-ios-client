@@ -3,16 +3,19 @@ import SwirlModel
 
 public struct SwirlNameCard: View {
     let profile: SwirlProfile
+    let isMyProfile: Bool
     let enablePressAnimation: Bool
     let onClick: () -> Void
 
     public init(
         profile: SwirlProfile,
+        isMyProfile: Bool = false,
         enablePressAnimation: Bool = true,
         onClick: @escaping () -> Void
     ) {
         self.profile = profile
         self.enablePressAnimation = enablePressAnimation
+        self.isMyProfile = isMyProfile
         self.onClick = onClick
     }
 
@@ -50,7 +53,8 @@ public struct SwirlNameCard: View {
                 name: profile.nickname,
                 profileUrl: profile.profileImage,
                 formattedTime: formattedTime,
-                location: ""
+                location: "",
+                isMyProfile: isMyProfile
             )
             .background(Color(hex: profile.color))
             .clipShape(CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight]))
@@ -60,7 +64,8 @@ public struct SwirlNameCard: View {
                 name: profile.nickname,
                 profileUrl: profile.profileImage,
                 formattedTime: formattedTime,
-                location: ""
+                location: "",
+                isMyProfile: isMyProfile
             )
             .background(.white)
             .clipShape(CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight]))
@@ -81,15 +86,13 @@ private struct SwirlNameCardContent: View {
     let profileUrl: String
     let formattedTime: String
     let location: String
+    let isMyProfile: Bool
 
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
                 Text(name)
-                    .font(
-                        Font.custom("PP Object Sans", size: 32)
-                            .weight(.medium)
-                    )
+                    .font(Font.custom("PP Object Sans", size: 40).weight(.medium))
                     .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
                     .padding(.leading, 16)
                 Spacer()
@@ -97,7 +100,19 @@ private struct SwirlNameCardContent: View {
                     .frame(width: 48, height: 48)
                     .padding(12)
             }
-            .padding(.bottom, 82)
+            HStack {
+                Text(SwirlDesignSystemStrings.myProfile)
+                    .font(.system(size: 12))
+                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color(red: 0.8, green: 0.8, blue: 0.8))
+                    .cornerRadius(15)
+                    .padding(.horizontal, 16)
+                Spacer()
+            }
+            .padding(.bottom, 66)
+            .opacity(isMyProfile ? 1.0 : 0.0)
             VStack(spacing: 2) {
                 HStack(spacing: 0) {
                     Text(SwirlDesignSystemStrings.youMetAt)
