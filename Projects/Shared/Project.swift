@@ -9,6 +9,7 @@ let targets: [Target] = [
             product: .staticLibrary,
             dependencies: [
                 .shared(implements: .DesignSystem),
+                .shared(implements: .Model),
             ]
         )
     ),
