@@ -13,7 +13,7 @@ public struct SwirlCardStackView: UIViewControllerRepresentable {
 
     public func makeUIViewController(context _: Context) -> SwirlCardStackViewController {
         let stackedLayout = TGLStackedLayout()
-        stackedLayout.isFillingHeight = false
+        stackedLayout.isFillingHeight = true
         stackedLayout.movingItemOnTop = true
         stackedLayout.topReveal = 80
         stackedLayout.itemSize = CGSize(width: 0, height: 250)
