@@ -1,6 +1,5 @@
 import HyphenCore
 import NearbyConnections
-import NearbyCoreAdapter
 import SwiftUI
 
 class SwirlNearbyConnectionManager: ObservableObject {

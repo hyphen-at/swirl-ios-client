@@ -1,0 +1,6 @@
+framework module NearbyConnections {
+  umbrella header "NearbyCoreAdapter.h"
+
+  export *
+  module * { export * }
+}
