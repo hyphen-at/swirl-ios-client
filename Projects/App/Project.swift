@@ -32,6 +32,7 @@ let targets: [Target] = [
                     "NSLocalNetworkUsageDescription": "Use this permission to locate the neighboring SWIRL user.",
                     "NSNearbyInteractionAllowOnceUsageDescription": "Use to share the SWIRL Name Card.",
                     "NSNearbyInteractionUsageDescription": "Use to share the SWIRL Name Card.",
+                    "NSFaceIDUsageDescription": "Signing transaction with device key.",
                     "NSBonjourServices": ["_248FAD1DE957._tcp", "_swirl._tcp"],
                 ]
             ),
