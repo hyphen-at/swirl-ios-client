@@ -22,6 +22,9 @@ public struct SignInScreen: View {
                 if viewStore.isHyphenAuthenticateChecking {
                     ProgressView()
                         .controlSize(.large)
+                        .onAppear {
+                            viewStore.send(.onHyphenAuthenticateChecking)
+                        }
                 } else {
                     VStack(spacing: 0) {
                         SwirlDesignSystemAsset.Images.swirlTextLogo.swiftUIImage

@@ -35,6 +35,7 @@ public extension ModulePath {
 public extension ModulePath {
     enum Core: String, CaseIterable {
         case Auth
+        case Blockchain
 
         public static let name: String = "Core"
     }

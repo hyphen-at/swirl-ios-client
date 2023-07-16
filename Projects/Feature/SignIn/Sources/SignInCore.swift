@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import Dependencies
 import SwirlAuth
+import SwirlBlockchain
 
 public struct SignIn: ReducerProtocol {
     public struct State: Equatable {
@@ -22,6 +23,7 @@ public struct SignIn: ReducerProtocol {
     }
 
     @Dependency(\.swirlAuthClient) var authClient
+    @Dependency(\.swirlBlockchainClient) var blockchainClient
 
     public var body: some ReducerProtocol<State, Action> {
         Reduce { state, action in
@@ -34,6 +36,10 @@ public struct SignIn: ReducerProtocol {
                     } else {
                         await dispatch(.onSignInNeed)
                     }
+                }
+            case .onLoggedIn:
+                return .run { _ in
+                    try await blockchainClient.fetchFlowAccount()
                 }
             case .onSignInNeed:
                 state.isHyphenAuthenticateChecking = false

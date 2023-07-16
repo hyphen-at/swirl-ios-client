@@ -8,6 +8,7 @@ let SPM = SwiftPackageManagerDependencies([
     .package(url: "https://github.com/SnapKit/SnapKit.git", .upToNextMajor(from: "5.0.1")),
     .package(url: "https://github.com/davdroman/swiftui-navigation-transitions", .upToNextMajor(from: "0.10.1")),
     .package(url: "https://github.com/gonzalezreal/NetworkImage", from: "5.0.0"),
+    .package(url: "https://github.com/outblock/flow-swift.git", from: "0.3.3"),
     .local(path: .relativeToRoot("hyphen-ios-sdk")),
 ])
 

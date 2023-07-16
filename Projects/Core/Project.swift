@@ -9,6 +9,7 @@ let targets: [Target] = [
             product: .staticLibrary,
             dependencies: [
                 .core(implements: .Auth),
+                .core(implements: .Blockchain),
             ]
         )
     ),

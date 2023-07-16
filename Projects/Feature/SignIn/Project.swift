@@ -17,6 +17,7 @@ let project = Project.makeModule(
                     .external(name: "ComposableArchitecture"),
                     .external(name: "Dependencies"),
                     .core(implements: .Auth),
+                    .core(implements: .Blockchain),
                     .shared(implements: .DesignSystem),
                 ]
             )
