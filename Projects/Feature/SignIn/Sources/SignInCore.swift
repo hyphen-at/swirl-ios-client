@@ -4,22 +4,34 @@ import SwirlAuth
 
 public struct SignIn: ReducerProtocol {
     public struct State: Equatable {
+        public var isAuthenticating: Bool = false
+        
         public init() {}
     }
 
     public enum Action {
         case onContinueWithGoogleButtonClick
+        
+        case onError
     }
 
     @Dependency(\.swirlAuthClient) var authClient
 
     public var body: some ReducerProtocol<State, Action> {
-        Reduce { _, action in
+        Reduce { state, action in
             switch action {
             case .onContinueWithGoogleButtonClick:
-                return .run { _ in
-                    try await authClient.signInWithGoogle()
+                state.isAuthenticating = true
+                return .run { dispatch in
+                    do {
+                        try await authClient.signInWithGoogle()
+                    } catch {
+                        await dispatch(.onError)
+                    }
                 }
+            case .onError:
+                state.isAuthenticating = false
+                return .none
             }
         }
     }
