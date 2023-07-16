@@ -1,9 +1,11 @@
 import Dependencies
 import Foundation
 import HyphenAuthenticate
+import HyphenCore
 import XCTestDynamicOverlay
 
 public struct AuthClient: Sendable {
+    public var isHyphenLoggedIn: @Sendable () -> Bool
     public var signInWithGoogle: @Sendable () async throws -> Void
 }
 
@@ -11,6 +13,9 @@ public struct AuthClient: Sendable {
 
 extension AuthClient: DependencyKey {
     public static var liveValue = Self(
+        isHyphenLoggedIn: {
+            Hyphen.shared.isCredentialExist()
+        },
         signInWithGoogle: {
             try await HyphenAuthenticate.shared.authenticate(provider: .google)
         }
@@ -21,6 +26,7 @@ extension AuthClient: DependencyKey {
 
 extension AuthClient: TestDependencyKey {
     public static var testValue = Self(
+        isHyphenLoggedIn: unimplemented("\(Self.self).isHyphenLoggedIn"),
         signInWithGoogle: unimplemented("\(Self.self).signInWithGoogle")
     )
 }

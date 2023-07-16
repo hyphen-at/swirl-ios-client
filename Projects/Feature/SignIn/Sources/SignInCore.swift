@@ -5,13 +5,19 @@ import SwirlAuth
 public struct SignIn: ReducerProtocol {
     public struct State: Equatable {
         public var isAuthenticating: Bool = false
-        
+        public var isHyphenAuthenticateChecking: Bool = true
+
         public init() {}
     }
 
     public enum Action {
+        case onHyphenAuthenticateChecking
+
+        case onLoggedIn
+        case onSignInNeed
+
         case onContinueWithGoogleButtonClick
-        
+
         case onError
     }
 
@@ -20,6 +26,18 @@ public struct SignIn: ReducerProtocol {
     public var body: some ReducerProtocol<State, Action> {
         Reduce { state, action in
             switch action {
+            case .onHyphenAuthenticateChecking:
+                return .run { dispatch in
+                    if authClient.isHyphenLoggedIn() {
+                        try await Task.sleep(nanoseconds: 1_000_000_000)
+                        await dispatch(.onLoggedIn)
+                    } else {
+                        await dispatch(.onSignInNeed)
+                    }
+                }
+            case .onSignInNeed:
+                state.isHyphenAuthenticateChecking = false
+                return .none
             case .onContinueWithGoogleButtonClick:
                 state.isAuthenticating = true
                 return .run { dispatch in
@@ -31,6 +49,8 @@ public struct SignIn: ReducerProtocol {
                 }
             case .onError:
                 state.isAuthenticating = false
+                return .none
+            default:
                 return .none
             }
         }
