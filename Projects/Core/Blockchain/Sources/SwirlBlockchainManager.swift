@@ -65,6 +65,41 @@ final class SwirlBlockchainManager: NSObject {
         return decodeResult
     }
 
+    func getNameCardList() async throws -> [SwirlProfile] {
+        let script = Flow.Script(text: """
+        import SwirlNametag from 0xfe9604dcbf6b270e
+        import SwirlMoment from 0xfe9604dcbf6b270e
+
+        /// Retrieve the SwirlNametag.Profile from the given address.
+        /// If nametag doesn't exist on the address, it returns nil.
+        pub fun main(address: Address): [SwirlNametag.Profile] {
+            let account = getAccount(address)
+            let profiles: [SwirlNametag.Profile] = []
+
+            if let collection = account.getCapability(SwirlMoment.CollectionPublicPath).borrow<&{SwirlMoment.SwirlMomentCollectionPublic}>() {
+                for tokenID in collection.getIDs() {
+                    let nft = collection.borrowSwirlMoment(id: tokenID)!
+                    let metadata = nft.resolveView(Type<SwirlNametag.Profile>())!
+
+                    let profile = metadata as? SwirlNametag.Profile ?? panic("invalid resolveView implementation on SwirlNametag")
+                    profiles.append(profile)
+                }
+            }
+            return profiles
+        }
+        """)
+
+        let result = try await flow.executeScriptAtLatestBlock(
+            script: script,
+            arguments: [
+                .address(flowAccount!.address),
+            ]
+        )
+
+        let decodeResult: [SwirlProfile] = try result.decode()
+        return decodeResult
+    }
+
     func createMyNameCard() async throws {
         let deviceKeySigner = HyphenDeviceKeySigner()
         let serverKeySigner = HyphenServerKeySigner()

@@ -6,6 +6,7 @@ import XCTestDynamicOverlay
 public struct BlockchainClient: Sendable {
     public var fetchFlowAccount: @Sendable () async throws -> Void
     public var getMyNameCard: @Sendable () async throws -> SwirlProfile?
+    public var getNameCardList: @Sendable () async throws -> [SwirlProfile]
 }
 
 // - MARK: Implementation of BlockchainClient
@@ -17,6 +18,9 @@ extension BlockchainClient: DependencyKey {
         },
         getMyNameCard: {
             try await SwirlBlockchainManager.shared.getMyNameCard()
+        },
+        getNameCardList: {
+            try await SwirlBlockchainManager.shared.getNameCardList()
         }
     )
 }
@@ -26,7 +30,8 @@ extension BlockchainClient: DependencyKey {
 extension BlockchainClient: TestDependencyKey {
     public static var testValue = Self(
         fetchFlowAccount: unimplemented("\(Self.self).fetchFlowAccount"),
-        getMyNameCard: unimplemented("\(Self.self).getMyNameCard")
+        getMyNameCard: unimplemented("\(Self.self).getMyNameCard"),
+        getNameCardList: unimplemented("\(Self.self).getNameCardList")
     )
 }
 
