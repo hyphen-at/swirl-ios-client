@@ -30,7 +30,8 @@ public struct SwirlNameCard: View {
         ZStack {
             var formattedTime: String {
                 let formatter = DateFormatter()
-                formatter.dateFormat = "MMM dd yyyy h:mma"
+                // formatter.dateFormat = "MMM dd yyyy h:mma"
+                formatter.dateFormat = "MMM dd yyyy"
                 formatter.amSymbol = "AM"
                 formatter.pmSymbol = "PM"
 
@@ -103,18 +104,23 @@ private struct SwirlNameCardContent: View {
                         .aspectRatio(1, contentMode: .fit)
 
                     if !profile.profileImage.isEmpty {
-                        NetworkImage(url: URL(string: profile.profileImage)!) { image in
-                            image
+                        if profile.profileImage == "default" {
+                            SwirlDesignSystemAsset.Images.cardDefaultProfile.swiftUIImage
                                 .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .layoutPriority(-1)
-                        } placeholder: {
-                            ZStack {
-                                ProgressView()
-                                    .controlSize(.mini)
+                        } else {
+                            NetworkImage(url: URL(string: profile.profileImage)!) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .layoutPriority(-1)
+                            } placeholder: {
+                                ZStack {
+                                    ProgressView()
+                                        .controlSize(.mini)
+                                }
+                                .aspectRatio(1, contentMode: .fit)
+                                .clipped()
                             }
-                            .aspectRatio(1, contentMode: .fit)
-                            .clipped()
                         }
                     }
                 }

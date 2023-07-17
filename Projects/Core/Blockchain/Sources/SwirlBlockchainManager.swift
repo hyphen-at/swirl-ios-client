@@ -23,6 +23,10 @@ final class SwirlBlockchainManager: NSObject {
         print("===== [SwirlBlockchainManager] loading account done. Flow account address -> \(flowAccount!.address.hex)")
     }
 
+    func getCachedAccountAddress() -> String {
+        return flowAccount!.address.hex
+    }
+
     func getMyNameCard() async throws -> SwirlProfile? {
         print("===== [SwirlBlockchainManager] get my name card...")
         if myNameCard != nil {
@@ -96,18 +100,54 @@ final class SwirlBlockchainManager: NSObject {
             ]
         )
 
-//        try await updateMyNameCard(
-//            nickname: "Doooooooora",
-//            profileImage: "https://storage.googleapis.com/nftimagebucket/tokens/0x598585fe8724d7ea3f527ddf712c2faa205dabe7/preview/1875.png",
-//            keywords: ["dora", "developer", "doraemon"],
-//            color: "#61BDFF",
-//            twitterHandle: "own_midnight_twt",
-//            telegramHandle: "oooooooom",
-//            discordHandle: nil,
-//            threadHandle: "own_ttttt"
-//        )
-
         let decodeResult: [SwirlProfile] = try result.decode()
+        return decodeResult
+    }
+
+    func getMomentList() async throws -> [SwirlMoment] {
+        let script = Flow.Script(text: """
+        import SwirlNametag from 0x5969d51aa05825c4
+        import SwirlMoment from 0x5969d51aa05825c4
+
+        pub struct MomentInfo {
+            pub let id: UInt64
+            pub let profile: SwirlNametag.Profile
+            pub let location: SwirlMoment.Coordinate
+            pub let mintedAt: UFix64
+
+            init(id: UInt64, profile: SwirlNametag.Profile, location: SwirlMoment.Coordinate, mintedAt: UFix64) {
+                self.id = id
+                self.profile = profile
+                self.location = location
+                self.mintedAt = mintedAt
+            }
+        }
+
+        /// Retrieve the SwirlNametag.Profile from the given address.
+        /// If nametag doesn't exist on the address, it returns nil.
+        pub fun main(address: Address): [MomentInfo] {
+            let account = getAccount(address)
+            let moments: [MomentInfo] = []
+
+            if let collection = account.getCapability(SwirlMoment.CollectionPublicPath).borrow<&{SwirlMoment.SwirlMomentCollectionPublic}>() {
+                for tokenID in collection.getIDs() {
+                    let nft = collection.borrowSwirlMoment(id: tokenID)!
+                    moments.append(MomentInfo(id: tokenID, profile: nft.profile(), location: nft.location, mintedAt: nft.mintedAt))
+                }
+            }
+            return moments
+        }
+
+        """)
+
+        let result = try await flow.executeScriptAtLatestBlock(
+            script: script,
+            arguments: [
+                .address(flowAccount!.address),
+            ]
+        )
+
+        let decodeResult: [SwirlMoment] = try result.decode()
         return decodeResult
     }
 
@@ -401,4 +441,140 @@ final class SwirlBlockchainManager: NSObject {
         let decodeResult: String = try result.decode()
         return decodeResult
     }
+
+    func mintMoment(
+        payload: [SwirlMomentSignaturePayload]
+    ) async throws {
+        let deviceKeySigner = HyphenDeviceKeySigner()
+        let serverKeySigner = HyphenServerKeySigner()
+        let payMasterKeySigner = HyphenPayMasterKeySigner()
+
+        let signers: [FlowSigner] = [serverKeySigner, deviceKeySigner, payMasterKeySigner]
+
+        var unsignedTx = try! await flow.buildTransaction {
+            cadence {
+                """
+                import NonFungibleToken from 0x631e88ae7f1d7c20
+                import MetadataViews from 0x631e88ae7f1d7c20
+                import SwirlMoment from 0x5969d51aa05825c4
+
+                transaction(address: [Address], lat: [Fix64], lng: [Fix64], nonce: [UInt64], keyIndex: [Int], signature: [String]) {
+                    let proofs: [SwirlMoment.ProofOfMeeting]
+
+                    prepare(signer: AuthAccount) {
+                        self.proofs = []
+
+                        for i, addr in address {
+                            let proof = SwirlMoment.ProofOfMeeting(
+                                account: getAccount(addr),
+                                location: SwirlMoment.Coordinate(lat[i], lng[i]),
+                                nonce: nonce[i],
+                                keyIndex: keyIndex[i],
+                                signature: signature[i]
+                            )
+                            self.proofs.append(proof)
+                        }
+                    }
+
+                    execute {
+                        SwirlMoment.mint(proofs: self.proofs)
+                    }
+                }
+
+                """
+            }
+
+            proposer {
+                Flow.TransactionProposalKey(address: Flow.Address(hex: payload.first!.address), keyIndex: 1)
+            }
+
+            arguments {
+                [
+                    .array(payload.map { .address(Flow.Address(hex: $0.address)) }),
+                    .array(payload.map { .fix64(Decimal(string: $0.lat.description)!) }),
+                    .array(payload.map { .fix64(Decimal(string: $0.lng.description)!) }),
+                    .array(payload.map { .uint64(UInt64(Int64($0.nonce))) }),
+                    .array(payload.map { _ in .int(1) }),
+                    .array(payload.map { .string($0.signature) }),
+                ]
+            }
+
+            payer {
+                payMasterKeySigner.address
+            }
+
+            authorizers {
+                deviceKeySigner.address
+            }
+        }
+
+        let signedTx = try await unsignedTx.sign(signers: signers)
+        let txWait = try await flow.sendTransaction(transaction: signedTx)
+        let txResult = try await txWait.onceSealed()
+
+        print("==== [SwirlBlockchainManager] mint moment successfully. Transaction hash -> \(txWait)")
+    }
+
+    func burnAllMoment() async throws {
+        let deviceKeySigner = HyphenDeviceKeySigner()
+        let serverKeySigner = HyphenServerKeySigner()
+        let payMasterKeySigner = HyphenPayMasterKeySigner()
+
+        let signers: [FlowSigner] = [serverKeySigner, deviceKeySigner, payMasterKeySigner]
+
+        var unsignedTx = try! await flow.buildTransaction {
+            cadence {
+                """
+                import NonFungibleToken from 0x631e88ae7f1d7c20
+                import SwirlMoment from 0x5969d51aa05825c4
+
+                transaction {
+                    let collectionRef: &SwirlMoment.Collection
+
+                    prepare(signer: AuthAccount) {
+                        self.collectionRef = signer.borrow<&SwirlMoment.Collection>(from: SwirlMoment.CollectionStoragePath)
+                            ?? panic("Account does not store an object at the specified path")
+                    }
+
+                    execute {
+                        for id in self.collectionRef.getIDs() {
+                            self.collectionRef.burn(id: id)
+                        }
+                    }
+                }
+                """
+            }
+
+            proposer {
+                Flow.TransactionProposalKey(address: deviceKeySigner.address, keyIndex: 1)
+            }
+
+            payer {
+                payMasterKeySigner.address
+            }
+
+            authorizers {
+                deviceKeySigner.address
+            }
+        }
+
+        let signedTx = try await unsignedTx.sign(signers: signers)
+        let txWait = try await flow.sendTransaction(transaction: signedTx)
+        let txResult = try await txWait.onceSealed()
+
+        print("==== [SwirlBlockchainManager] burn all moment successfully. Transaction hash -> \(txWait)")
+
+        _ = try await getNameCardList()
+    }
 }
+
+//        try await updateMyNameCard(
+//            nickname: "Doooooooora",
+//            profileImage: "https://storage.googleapis.com/nftimagebucket/tokens/0x598585fe8724d7ea3f527ddf712c2faa205dabe7/preview/1875.png",
+//            keywords: ["dora", "developer", "doraemon"],
+//            color: "#61BDFF",
+//            twitterHandle: "own_midnight_twt",
+//            telegramHandle: "oooooooom",
+//            discordHandle: nil,
+//            threadHandle: "own_ttttt"
+//        )

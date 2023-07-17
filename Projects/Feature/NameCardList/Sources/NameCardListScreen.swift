@@ -9,8 +9,6 @@ import SwiftUIIntrospect
 import SwirlDesignSystem
 import SwirlModel
 
-// proposer
-
 public struct NameCardListScreen: View {
     let store: StoreOf<NameCardList>
 
@@ -79,8 +77,13 @@ public struct NameCardListScreen: View {
                                 get: { viewStore.profiles },
                                 set: { _ in }
                             ),
-                            onNameCardClick: { profile in
-                                viewStore.send(.onNameCardClick(profile: profile))
+                            onNameCardClick: { profile, index in
+                                viewStore.send(
+                                    .onNameCardClick(
+                                        profile: profile,
+                                        momentId: viewStore.moments[index - 1].id
+                                    )
+                                )
                             }
                         )
 
@@ -105,101 +108,27 @@ public struct NameCardListScreen: View {
                 }
 
                 if isShakeEnabled {
-                    VStack(spacing: 0) {
-                        Spacer()
-                        HStack {
+                    ZStack {
+                        VStack(spacing: 0) {
                             Spacer()
-                            Text(SwirlNameCardListFeatureStrings.readyToSwirl)
-                                .font(Font.custom("PP Object Sans", size: 28).weight(.medium))
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                            Spacer()
-                        }
-                        SwirlNameCard(
-                            profile: viewStore.profiles.first!,
-                            isMyProfile: true,
-                            onClick: {}
-                        )
-                        .padding(.top, 60)
-                        .padding(.horizontal, 8)
-                        .parallax(multiplier: 10, maxOffset: 60)
-                        .shimmer(color: Color(hex: viewStore.profiles.first!.color)!.opacity(0.9))
-                        Button(action: {
-                            isShakeEnabled = false
-
-                            deviceInteractor.session?.invalidate()
-                            deviceInteractor.mpc?.invalidate()
-                            deviceInteractor.sessionClear()
-
-                            let generator = UINotificationFeedbackGenerator()
-                            generator.notificationOccurred(.success)
-                        }) {
-                            SwirlNameCardListFeatureAsset.xButton.swiftUIImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 44)
-                        }
-                        .padding(.top, 156)
-                        Spacer()
-                    }
-                    .background(
-                        Color(hex: viewStore.profiles.first!.color)
-                            .opacity(0.3)
-                    )
-                    .edgesIgnoringSafeArea(.all)
-                    .onChange(of: deviceInteractor.peerNameCard) { value in
-                        isMomentConfirmationSheetPresented = value != nil
-                    }
-                    .onAppear {
-                        let generator = UINotificationFeedbackGenerator()
-                        generator.notificationOccurred(.success)
-
-                        deviceInteractor.startup(myNameCard: viewStore.profiles.first!, signaturePayload: viewStore.signatureData)
-                    }
-                    .partialSheet(
-                        isPresented: $isMomentConfirmationSheetPresented,
-                        iPhoneStyle: PSIphoneStyle(
-                            background: .solid(Color(hex: "#F3F7F8")!.opacity(0.97)),
-                            handleBarStyle: .none,
-                            cover: .enabled(.black.opacity(0.4)),
-                            cornerRadius: 24
-                        )
-                    ) {
-                        VStack {
-                            Text(SwirlNameCardListFeatureStrings.confirmToSwirl)
-                                .font(.system(size: 24).weight(.medium))
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(.black)
-                                .padding(.top, 40)
-                            Text(SwirlNameCardListFeatureStrings.confirmToSwirlDescription(deviceInteractor.peerNameCard?.nickname ?? ""))
-                                .font(.system(size: 13).weight(.medium))
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(.black)
-                                .padding(.top, 13)
-
-                            if let peerNameCard = deviceInteractor.peerNameCard {
-                                SwirlNameCard(
-                                    profile: peerNameCard,
-                                    isMyProfile: false,
-                                    hideMet: false,
-                                    onClick: {}
-                                )
-                                .padding(.horizontal, 8)
-                                .padding(.top, 30)
+                            HStack {
+                                Spacer()
+                                Text(SwirlNameCardListFeatureStrings.readyToSwirl)
+                                    .font(Font.custom("PP Object Sans", size: 28).weight(.medium))
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                                Spacer()
                             }
-                            Button(action: {}) {
-                                Text(SwirlDesignSystemStrings.confirm)
-                                    .font(.system(size: 17))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 14)
-                                    .background(Color(red: 0, green: 0.48, blue: 1))
-                                    .cornerRadius(12)
-                                    .padding(.top, 14)
-                            }
-                            .padding(.top, 30)
+                            SwirlNameCard(
+                                profile: viewStore.profiles.first!,
+                                isMyProfile: true,
+                                onClick: {}
+                            )
+                            .padding(.top, 60)
+                            .padding(.horizontal, 8)
+                            .parallax(multiplier: 10, maxOffset: 60)
+                            .shimmer(color: Color(hex: viewStore.profiles.first!.color)!.opacity(0.9))
                             Button(action: {
-                                isMomentConfirmationSheetPresented = false
                                 isShakeEnabled = false
 
                                 deviceInteractor.session?.invalidate()
@@ -209,22 +138,135 @@ public struct NameCardListScreen: View {
                                 let generator = UINotificationFeedbackGenerator()
                                 generator.notificationOccurred(.success)
                             }) {
-                                Text(SwirlDesignSystemStrings.cancel)
-                                    .font(.system(size: 17))
+                                SwirlNameCardListFeatureAsset.xButton.swiftUIImage
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 44)
                             }
-                            .padding(.top, 14)
-                            .padding(.bottom, 23)
+                            .padding(.top, 156)
+                            Spacer()
                         }
-                        .onDisappear {
-                            isShakeEnabled = false
-
-                            deviceInteractor.session?.invalidate()
-                            deviceInteractor.mpc?.invalidate()
-                            deviceInteractor.sessionClear()
-
+                        .background(
+                            Color(hex: viewStore.profiles.first!.color)
+                                .opacity(0.3)
+                        )
+                        .edgesIgnoringSafeArea(.all)
+                        .onChange(of: deviceInteractor.peerData) { value in
+                            isMomentConfirmationSheetPresented = value != nil
+                        }
+                        .onAppear {
                             let generator = UINotificationFeedbackGenerator()
                             generator.notificationOccurred(.success)
+
+                            deviceInteractor.startup(
+                                myNameCard: viewStore.profiles.first!,
+                                signaturePayload: viewStore.signatureData,
+                                nonce: viewStore.nonce
+                            )
                         }
+                        .partialSheet(
+                            isPresented: $isMomentConfirmationSheetPresented,
+                            iPhoneStyle: PSIphoneStyle(
+                                background: .solid(Color(hex: "#F3F7F8")!.opacity(0.97)),
+                                handleBarStyle: .none,
+                                cover: .enabled(.black.opacity(0.4)),
+                                cornerRadius: 24
+                            )
+                        ) {
+                            VStack {
+                                Text(SwirlNameCardListFeatureStrings.confirmToSwirl)
+                                    .font(.system(size: 24).weight(.medium))
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(.black)
+                                    .padding(.top, 40)
+                                Text(SwirlNameCardListFeatureStrings.confirmToSwirlDescription(deviceInteractor.peerData?.profile.nickname ?? ""))
+                                    .font(.system(size: 13).weight(.medium))
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(.black)
+                                    .padding(.top, 13)
+
+                                if let peerData = deviceInteractor.peerData {
+                                    SwirlNameCard(
+                                        profile: peerData.profile,
+                                        isMyProfile: false,
+                                        hideMet: false,
+                                        onClick: {}
+                                    )
+                                    .padding(.horizontal, 8)
+                                    .padding(.top, 30)
+                                }
+                                Button(action: {
+                                    viewStore.send(.startTransaction([deviceInteractor.myData!, deviceInteractor.peerData!]))
+                                    isMomentConfirmationSheetPresented = false
+                                }) {
+                                    Text(SwirlDesignSystemStrings.confirm)
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 20)
+                                        .padding(.vertical, 14)
+                                        .background(Color(red: 0, green: 0.48, blue: 1))
+                                        .cornerRadius(12)
+                                        .padding(.top, 14)
+                                }
+                                .padding(.top, 30)
+                                Button(action: {
+                                    isMomentConfirmationSheetPresented = false
+                                    isShakeEnabled = false
+
+                                    deviceInteractor.session?.invalidate()
+                                    deviceInteractor.mpc?.invalidate()
+                                    deviceInteractor.sessionClear()
+
+                                    let generator = UINotificationFeedbackGenerator()
+                                    generator.notificationOccurred(.success)
+                                }) {
+                                    Text(SwirlDesignSystemStrings.cancel)
+                                        .font(.system(size: 17))
+                                }
+                                .padding(.top, 14)
+                                .padding(.bottom, 23)
+                            }
+                            .onDisappear {
+                                if !viewStore.isTransactionProcessing {
+                                    isShakeEnabled = false
+                                }
+
+                                deviceInteractor.session?.invalidate()
+                                deviceInteractor.mpc?.invalidate()
+                                deviceInteractor.sessionClear()
+
+                                let generator = UINotificationFeedbackGenerator()
+                                generator.notificationOccurred(.success)
+                            }
+                        }
+
+                        if viewStore.isTransactionProcessing {
+                            VStack {
+                                Spacer()
+                                HStack {
+                                    Spacer()
+                                    ProgressView()
+                                        .controlSize(.large)
+                                    Spacer()
+                                }
+                                Spacer()
+                            }
+                            .background(.black.opacity(0.4))
+                            .allowsHitTesting(false)
+                            .onDisappear {
+                                isShakeEnabled = false
+
+                                deviceInteractor.session?.invalidate()
+                                deviceInteractor.mpc?.invalidate()
+                                deviceInteractor.sessionClear()
+
+                                let generator = UINotificationFeedbackGenerator()
+                                generator.notificationOccurred(.success)
+                            }
+                        }
+                    }
+                    .onDisappear {
+                        viewStore.send(.loading)
                     }
                 }
             }

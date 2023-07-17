@@ -5,11 +5,11 @@ import SwirlModel
 
 public struct SwirlCardStackView: UIViewControllerRepresentable {
     @Binding private var profiles: [SwirlProfile]
-    private var onNameCardClick: (SwirlProfile) -> Void
+    private var onNameCardClick: (SwirlProfile, Int) -> Void
 
     public init(
         profiles: Binding<[SwirlProfile]>,
-        onNameCardClick: @escaping (SwirlProfile) -> Void
+        onNameCardClick: @escaping (SwirlProfile, Int) -> Void
     ) {
         _profiles = profiles
         self.onNameCardClick = onNameCardClick
@@ -21,7 +21,7 @@ public struct SwirlCardStackView: UIViewControllerRepresentable {
         stackedLayout.movingItemOnTop = true
         stackedLayout.topReveal = 80
         stackedLayout.itemSize = CGSize(width: 0, height: 240)
-        stackedLayout.layoutMargin = .init(top: 10, left: 8, bottom: 120, right: 8)
+        stackedLayout.layoutMargin = .init(top: 10, left: 8, bottom: 180, right: 8)
 
         let viewController = SwirlCardStackViewController(collectionViewLayout: stackedLayout)
         viewController.onNameCardClick = onNameCardClick
@@ -37,11 +37,13 @@ public struct SwirlCardStackView: UIViewControllerRepresentable {
 public class SwirlCardStackViewController: TGLStackedViewController {
     private var profiles: [SwirlProfile] = []
 
-    public var onNameCardClick: (SwirlProfile) -> Void = { _ in }
+    public var onNameCardClick: (SwirlProfile, Int) -> Void = { _, _ in }
 
     public func updateProfileList(_ profiles: [SwirlProfile]) {
-        self.profiles = profiles
-        collectionView.reloadData()
+        if profiles.count != self.profiles.count {
+            self.profiles = profiles
+            collectionView.reloadData()
+        }
     }
 
     override public func viewDidLoad() {
@@ -66,14 +68,14 @@ public class SwirlCardStackViewController: TGLStackedViewController {
 
     override public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SwirlCardStackCell.reuseIdentifier, for: indexPath) as! SwirlCardStackCell
-        cell.hideMet = indexPath.item == 0
         cell.isMyProfile = indexPath.item == 0
+        cell.hideMet = indexPath.item == 0
         cell.profile = profiles[indexPath.item]
         return cell
     }
 
     override public func collectionView(_: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        onNameCardClick(profiles[indexPath.item])
+        onNameCardClick(profiles[indexPath.item], indexPath.item)
     }
 }
 

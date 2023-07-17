@@ -37,8 +37,8 @@ struct SwirlCoordinator: ReducerProtocol {
 
                     await dispatch(.updateRoutes(newRoutes))
                 }
-            case let .routeAction(_, action: .nameCardList(.onNameCardClick(profile: profile))):
-                state.routes.presentSheet(.nameCardDetail(.init(profile: profile)))
+            case let .routeAction(_, action: .nameCardList(.onNameCardClick(profile: profile, momentId: momentId))):
+                state.routes.presentSheet(.nameCardDetail(.init(profile: profile, momentId: momentId)))
                 return .none
             default:
                 return .none

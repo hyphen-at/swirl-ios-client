@@ -7,7 +7,7 @@ import SwirlModel
 public struct SignInScreen: View {
     let store: StoreOf<SignIn>
 
-    @State private var randomName: String = ""
+    @State private var randomName: String = randomFakeFirstName()
     @State private var randomLocation: String = ""
     @State private var randomDate: Date = .init()
     @State private var randomColor: Color = .black
@@ -34,10 +34,15 @@ public struct SignInScreen: View {
                         SwirlNameCard(
                             profile: SwirlProfile(
                                 nickname: randomName,
-                                profileImage: "",
+                                profileImage: "default",
                                 keywords: [""],
                                 color: randomColor.toHex()!,
-                                socialHandles: []
+                                socialHandles: [
+                                    SwirlProfile.SocialHandle(channel: "twitter", handle: "@helloworld"),
+                                    SwirlProfile.SocialHandle(channel: "discord", handle: "helloworld"),
+                                    SwirlProfile.SocialHandle(channel: "telegram", handle: "helloworld"),
+                                    SwirlProfile.SocialHandle(channel: "thread", handle: "hihi.world"),
+                                ]
                             ),
                             onClick: {}
                         )

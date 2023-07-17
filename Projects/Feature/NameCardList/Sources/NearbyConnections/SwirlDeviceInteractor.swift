@@ -1,11 +1,15 @@
+import Dependencies
 import Foundation
 import MultipeerConnectivity
 import NearbyInteraction
 import SwiftUI
 import SwirlModel
 @_spi(HyphenInternal) import HyphenCore
+import SwirlBlockchain
 
 class SwirlDeviceInteractor: NSObject, ObservableObject, NISessionDelegate {
+    @Dependency(\.swirlBlockchainClient) private var blockchainClient
+
     var mpc: MPCSession? = nil
     var session: NISession? = nil
     private var peerDiscoveryToken: NIDiscoveryToken? = nil
@@ -20,16 +24,23 @@ class SwirlDeviceInteractor: NSObject, ObservableObject, NISessionDelegate {
 
     private var isConnecting = false
 
-    private var myNameCard: SwirlProfile? = nil
+    var myData: SwirlMomentSignaturePayload? = nil
 
-    @Published var peerNameCard: SwirlProfile? = nil
+    @Published var peerData: SwirlMomentSignaturePayload? = nil
     private var signedPayloadData: Data? = nil
 
-    func startup(myNameCard: SwirlProfile, signaturePayload: String) {
+    func startup(myNameCard: SwirlProfile, signaturePayload: String, nonce: Int) {
         signedPayloadData = HyphenCryptography.signData(signaturePayload.data(using: .utf8)!)
         print("==== [SignedData] \(signedPayloadData!.hexValue)")
 
-        self.myNameCard = myNameCard
+        myData = SwirlMomentSignaturePayload(
+            address: blockchainClient.getCachedAccountAddress(),
+            lat: 37.5313128,
+            lng: 127.0077684,
+            signature: signedPayloadData!.hexValue,
+            nonce: nonce,
+            profile: myNameCard
+        )
 
         // Create the NISession.
         session = NISession()
@@ -90,18 +101,18 @@ class SwirlDeviceInteractor: NSObject, ObservableObject, NISessionDelegate {
                 self.message = $0
                 self.isConnecting = false
 
-                let peerNameCard = try! JSONDecoder().decode(SwirlProfile.self, from: self.message.data(using: .utf8)!)
-                self.peerNameCard = peerNameCard
+                let peerData = try! JSONDecoder().decode(SwirlMomentSignaturePayload.self, from: self.message.data(using: .utf8)!)
+                self.peerData = peerData
 
-                print("=== [DataReceived] -> \(peerNameCard)")
+                print("=== [DataReceived] -> \(peerData)")
             }
 
-            let encodedNameCard = try! JSONEncoder().encode(myNameCard)
+            let encodedMyData = try! JSONEncoder().encode(myData)
 
             SwirlNearbyConnectionManager.shared.start(
                 myToken: myToken,
                 peerToken: self.peerToken,
-                myProfileJsonString: String(data: encodedNameCard, encoding: .utf8)!
+                myProfileJsonString: String(data: encodedMyData, encoding: .utf8)!
             )
         }
 //
@@ -241,6 +252,6 @@ class SwirlDeviceInteractor: NSObject, ObservableObject, NISessionDelegate {
     func sessionClear() {
         isConnecting = false
         SwirlNearbyConnectionManager.shared.invalidate()
-        peerNameCard = nil
+        peerData = nil
     }
 }

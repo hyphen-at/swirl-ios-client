@@ -12,12 +12,15 @@ public struct NameCardDetail: ReducerProtocol {
 
     public struct State: Equatable {
         public var profile: SwirlProfile
+        public var momentId: UInt64
         public var location: LatLng = .init(latitude: 37.5313792, longitude: 127.0089012)
 
         public init(
-            profile: SwirlProfile
+            profile: SwirlProfile,
+            momentId: UInt64
         ) {
             self.profile = profile
+            self.momentId = momentId
         }
     }
 

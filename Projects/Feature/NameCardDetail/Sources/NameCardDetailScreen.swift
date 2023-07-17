@@ -27,7 +27,7 @@ public struct NameCardDetailScreen: View {
                                 .fill(Color.gray.opacity(0.2))
                                 .aspectRatio(1, contentMode: .fit)
 
-                            NetworkImage(url: URL(string: "https://picsum.photos/1024/1024")!) { image in
+                            NetworkImage(url: URL(string: viewStore.profile.profileImage)!) { image in
                                 image
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
@@ -53,9 +53,7 @@ public struct NameCardDetailScreen: View {
                         Group {
                             SwirlFlowLayout(
                                 mode: .scrollable,
-                                items: ["Some long item here", "And then some longer one",
-                                        "Short", "Items", "Here", "And", "A", "Few", "More",
-                                        "And then a very very very long one"],
+                                items: viewStore.profile.keywords,
                                 itemSpacing: 2
                             ) {
                                 Text($0)
@@ -123,7 +121,7 @@ public struct NameCardDetailScreen: View {
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 18)
-                                        Text(viewStore.profile.socialHandles.filter { $0.channel == "threads" }.first?.handle ?? "")
+                                        Text(viewStore.profile.socialHandles.filter { $0.channel == "thread" }.first?.handle ?? "")
                                             .font(.system(size: 12))
                                             .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
                                         Spacer()
@@ -135,38 +133,38 @@ public struct NameCardDetailScreen: View {
                         }
                         .padding(.horizontal, 20)
 
-                        Group {
-                            HStack {
-                                Text(SwirlNameCardDetailFeatureStrings.yourMemories(viewStore.profile.nickname))
-                                    .font(Font.custom("PP Object Sans", size: 16).weight(.medium))
-                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                                Spacer()
-                            }
-                            .padding(.top, 32)
-                            ZStack {
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.2))
-                                    .aspectRatio(1.179, contentMode: .fit)
-
-                                NetworkImage(url: URL(string: "https://picsum.photos/1340/1136")!) { image in
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .layoutPriority(-1)
-                                } placeholder: {
-                                    ZStack {
-                                        ProgressView()
-                                            .controlSize(.large)
-                                    }
-                                    .aspectRatio(1, contentMode: .fit)
-                                    .clipped()
-                                }
-                            }
-                            .clipped()
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .padding(.top, 8)
-                        }
-                        .padding(.horizontal, 20)
+//                        Group {
+//                            HStack {
+//                                Text(SwirlNameCardDetailFeatureStrings.yourMemories(viewStore.profile.nickname))
+//                                    .font(Font.custom("PP Object Sans", size: 16).weight(.medium))
+//                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+//                                Spacer()
+//                            }
+//                            .padding(.top, 32)
+//                            ZStack {
+//                                Rectangle()
+//                                    .fill(Color.gray.opacity(0.2))
+//                                    .aspectRatio(1.179, contentMode: .fit)
+//
+//                                NetworkImage(url: URL(string: "https://picsum.photos/1340/1136")!) { image in
+//                                    image
+//                                        .resizable()
+//                                        .aspectRatio(contentMode: .fill)
+//                                        .layoutPriority(-1)
+//                                } placeholder: {
+//                                    ZStack {
+//                                        ProgressView()
+//                                            .controlSize(.large)
+//                                    }
+//                                    .aspectRatio(1, contentMode: .fit)
+//                                    .clipped()
+//                                }
+//                            }
+//                            .clipped()
+//                            .clipShape(RoundedRectangle(cornerRadius: 12))
+//                            .padding(.top, 8)
+//                        }
+//                        .padding(.horizontal, 20)
 
                         Group {
                             HStack {
@@ -188,16 +186,17 @@ public struct NameCardDetailScreen: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
                                     .padding(.top, 12)
+                                    .padding(.bottom, 28)
                                 Spacer()
                             }
-                            HStack {
-                                Text("Centro Luiz Gonzaga, Rio de Janeiro, Brazil")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                                    .padding(.top, 4)
-                                    .padding(.bottom, 40)
-                                Spacer()
-                            }
+//                            HStack {
+//                                Text("Centro Luiz Gonzaga, Rio de Janeiro, Brazil")
+//                                    .font(.system(size: 12))
+//                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+//                                    .padding(.top, 4)
+//                                    .padding(.bottom, 40)
+//                                Spacer()
+//                            }
                         }
                         .padding(.horizontal, 20)
                         VStack(alignment: .center, spacing: 0) {
