@@ -12,9 +12,13 @@ public struct NameCardDetail: ReducerProtocol {
         public var location: LatLng = .init(latitude: 37.5313792, longitude: 127.0089012)
 
         public var isMomentDeleteConfirmAlertPresented: Bool = false
+        public var isFlowViewPresented: Bool = false
+
         public var isDeleting: Bool = false
 
         public var requestDismiss: Bool = false
+
+        public var flowViewUrl: String = "https://testnet.flowview.app/account/"
 
         public init(
             profile: SwirlProfile,
@@ -26,6 +30,9 @@ public struct NameCardDetail: ReducerProtocol {
     }
 
     public enum Action {
+        case onFlowViewUrlLoadNeeded
+        case setFlowViewPresented(Bool)
+
         case onProfileImageLongPress
 
         case onDeleteMomentConfirmAlertPresent(Bool)
@@ -33,11 +40,17 @@ public struct NameCardDetail: ReducerProtocol {
         case onDeleteMomentComplete
     }
 
-    @Dependency(\.swirlBlockchainClient) var blochchainClient
+    @Dependency(\.swirlBlockchainClient) var blockchainClient
 
     public var body: some ReducerProtocol<State, Action> {
         Reduce { state, action in
             switch action {
+            case .onFlowViewUrlLoadNeeded:
+                state.flowViewUrl = "\(state.flowViewUrl)/\(blockchainClient.getCachedAccountAddress())/collection/SwirlMomentCollection/\(state.momentId)"
+                return .none
+            case let .setFlowViewPresented(isPresented):
+                state.isFlowViewPresented = isPresented
+                return .none
             case .onProfileImageLongPress:
                 state.isMomentDeleteConfirmAlertPresented = true
                 return .none
@@ -48,7 +61,7 @@ public struct NameCardDetail: ReducerProtocol {
                 state.isMomentDeleteConfirmAlertPresented = false
                 state.isDeleting = true
                 return .run { [state = state] dispatch in
-                    try await blochchainClient.burnMoment(state.momentId)
+                    try await blockchainClient.burnMoment(state.momentId)
                     await dispatch(.onDeleteMomentComplete)
                 }
             case .onDeleteMomentComplete:

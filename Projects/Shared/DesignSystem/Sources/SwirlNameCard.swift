@@ -121,6 +121,7 @@ private struct SwirlNameCardContent: View {
                                 .aspectRatio(1, contentMode: .fit)
                                 .clipped()
                             }
+                            .id(profile)
                         }
                     }
                 }
@@ -199,7 +200,7 @@ private struct SwirlNameCardContent: View {
                 }
                 Spacer()
             }
-            .padding(20)
+            .padding(18)
 
             if !hideMet {
                 VStack(spacing: 2) {

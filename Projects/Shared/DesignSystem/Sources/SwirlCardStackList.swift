@@ -154,21 +154,3 @@ class SwirlCardStackCell: UICollectionViewCell {
         ])
     }
 }
-
-func randomDate() -> Date {
-    let day = arc4random_uniform(30) + 1
-    let month = arc4random_uniform(12) + 1
-    let year = 2023
-    let hour = arc4random_uniform(24)
-    let minute = arc4random_uniform(60)
-
-    var dateComponents = DateComponents()
-    dateComponents.year = Int(year)
-    dateComponents.month = Int(month)
-    dateComponents.day = Int(day)
-    dateComponents.hour = Int(hour)
-    dateComponents.minute = Int(minute)
-
-    let userCalendar = Calendar.current
-    return userCalendar.date(from: dateComponents)!
-}

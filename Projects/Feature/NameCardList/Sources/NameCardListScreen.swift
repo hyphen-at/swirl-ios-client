@@ -81,7 +81,7 @@ public struct NameCardListScreen: View {
                                 viewStore.send(
                                     .onNameCardClick(
                                         profile: profile,
-                                        momentId: viewStore.moments[index - 1].id
+                                        momentId: index == 0 ? UInt64(Int64(0)) : viewStore.moments[index - 1].id
                                     )
                                 )
                             }

@@ -219,7 +219,9 @@ public struct NameCardDetailScreen: View {
                                 .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
                                 .padding(.top, 16)
 
-                            Button(action: {}) {
+                            Button(action: {
+                                viewStore.send(.setFlowViewPresented(true))
+                            }) {
                                 HStack(spacing: 12) {
                                     Spacer()
                                     SwirlDesignSystemAsset.Icons.flowLogo.swiftUIImage
@@ -267,6 +269,7 @@ public struct NameCardDetailScreen: View {
                             Spacer()
                             ProgressView()
                                 .controlSize(.large)
+                                .tint(.white)
                             Spacer()
                         }
                         Spacer()
@@ -276,6 +279,8 @@ public struct NameCardDetailScreen: View {
                 }
             }
             .onAppear {
+                viewStore.send(.onFlowViewUrlLoadNeeded)
+
                 region = MKCoordinateRegion(
                     center: CLLocationCoordinate2D(latitude: viewStore.location.latitude, longitude: viewStore.location.longitude),
                     span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001)
@@ -295,6 +300,14 @@ public struct NameCardDetailScreen: View {
                     },
                     secondaryButton: .cancel(Text(SwirlDesignSystemStrings.cancel))
                 )
+            }
+            .sheet(
+                isPresented: Binding(
+                    get: { viewStore.isFlowViewPresented },
+                    set: { value in viewStore.send(.setFlowViewPresented(value)) }
+                )
+            ) {
+                SafariView(url: URL(string: viewStore.flowViewUrl)!)
             }
             .interactiveDismissDisabled(viewStore.isDeleting)
             .onChange(of: viewStore.requestDismiss) { value in
