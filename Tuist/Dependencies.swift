@@ -9,6 +9,7 @@ let SPM = SwiftPackageManagerDependencies([
     .package(url: "https://github.com/davdroman/swiftui-navigation-transitions", .upToNextMajor(from: "0.10.1")),
     .package(url: "https://github.com/gonzalezreal/NetworkImage", from: "5.0.0"),
     .package(url: "https://github.com/outblock/flow-swift.git", from: "0.3.3"),
+    .package(url: "https://github.com/ryanlintott/LookingGlassUI", from: "0.3.1"),
     .local(path: .relativeToRoot("hyphen-ios-sdk")),
 ])
 
