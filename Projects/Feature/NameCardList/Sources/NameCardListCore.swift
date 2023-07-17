@@ -22,6 +22,8 @@ public struct NameCardList: ReducerProtocol {
         case loading
         case loadingComplete(profiles: [SwirlProfile], moments: [SwirlMoment])
 
+        case startAutoRefresh
+
         case createSignaturePayload
         case createSignaturePayloadDone(String)
 
@@ -46,6 +48,7 @@ public struct NameCardList: ReducerProtocol {
     }
 
     @Dependency(\.swirlBlockchainClient) var blockchainClient
+    @Dependency(\.mainRunLoop) var mainRunLoop
 
     public var body: some ReducerProtocol<State, Action> {
         Reduce { state, action in
@@ -63,6 +66,12 @@ public struct NameCardList: ReducerProtocol {
                 state.moments = moments
 
                 return .none
+            case .startAutoRefresh:
+                return .run { dispatch in
+                    for await _ in mainRunLoop.timer(interval: .seconds(5)) {
+                        await dispatch(.loading)
+                    }
+                }
             case .createSignaturePayload:
                 return .run { dispatch in
                     let signatureData = try await blockchainClient.evalProfOfMeetingSignData(37.5313128, 127.0077684)

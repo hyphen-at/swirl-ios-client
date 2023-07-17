@@ -265,9 +265,6 @@ public struct NameCardListScreen: View {
                             }
                         }
                     }
-                    .onDisappear {
-                        viewStore.send(.loading)
-                    }
                 }
             }
             .onAppear {
@@ -277,6 +274,7 @@ public struct NameCardListScreen: View {
                 if !value {
                     UIView.setAnimationsEnabled(true)
                     viewStore.send(.createSignaturePayload)
+                    viewStore.send(.startAutoRefresh)
                 }
             }
             .onShake {
