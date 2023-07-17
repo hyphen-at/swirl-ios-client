@@ -19,6 +19,7 @@ let project = Project.makeModule(
                     .external(name: "NetworkImage"),
                     .shared(implements: .DesignSystem),
                     .shared(implements: .Model),
+                    .core(implements: .Blockchain),
                 ]
             )
         ),

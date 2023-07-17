@@ -4,3 +4,6 @@ LOCATION = "Location";
 FLOWSCAN_TITLE = "Show off\nthat you met %@";
 FLOWSCAN_SUBTITLE = "A Moment SBT,\nverified by Proof-of-Location,\nis minted to both of your accounts.";
 FLOWSCAN_CTA = "View on Flowscan";
+
+MOMENT_REMOVE_CONFIRM_TITLE = "Delete Moment";
+MOMENT_REMOVE_CONFIRM_DESCRIPTION = "Are you sure delete this moment?";

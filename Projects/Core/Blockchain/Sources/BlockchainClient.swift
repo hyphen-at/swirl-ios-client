@@ -14,7 +14,7 @@ public struct BlockchainClient: Sendable {
 
     public var evalProfOfMeetingSignData: @Sendable (Float, Float) async throws -> String
     public var mintMoment: @Sendable ([SwirlMomentSignaturePayload]) async throws -> Void
-    public var burnMoment: @Sendable () async throws -> Void
+    public var burnMoment: @Sendable (UInt64) async throws -> Void
 }
 
 // - MARK: Implementation of BlockchainClient
@@ -54,8 +54,8 @@ extension BlockchainClient: DependencyKey {
         mintMoment: { payload in
             try await SwirlBlockchainManager.shared.mintMoment(payload: payload)
         },
-        burnMoment: {
-            try await SwirlBlockchainManager.shared.burnAllMoment()
+        burnMoment: { id in
+            try await SwirlBlockchainManager.shared.burnMoment(with: id)
         }
     )
 }

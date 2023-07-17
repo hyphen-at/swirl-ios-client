@@ -9,3 +9,5 @@ MY_PROFILE = "My Profile";
 
 CONFIRM = "Confirm";
 CANCEL = "Cancel";
+
+YES = "Yes";

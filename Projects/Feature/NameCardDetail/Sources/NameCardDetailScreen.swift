@@ -17,6 +17,8 @@ public struct NameCardDetailScreen: View {
         span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
     )
 
+    @Environment(\.dismiss) var dismiss
+
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack(alignment: .top) {
@@ -40,6 +42,9 @@ public struct NameCardDetailScreen: View {
                                 .aspectRatio(1, contentMode: .fit)
                                 .clipped()
                             }
+                        }
+                        .onTapGesture(count: 2) {
+                            viewStore.send(.onDeleteMomentConfirmAlertPresent(true))
                         }
                         .clipped()
                         HStack {
@@ -133,38 +138,38 @@ public struct NameCardDetailScreen: View {
                         }
                         .padding(.horizontal, 20)
 
-//                        Group {
-//                            HStack {
-//                                Text(SwirlNameCardDetailFeatureStrings.yourMemories(viewStore.profile.nickname))
-//                                    .font(Font.custom("PP Object Sans", size: 16).weight(.medium))
-//                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-//                                Spacer()
-//                            }
-//                            .padding(.top, 32)
-//                            ZStack {
-//                                Rectangle()
-//                                    .fill(Color.gray.opacity(0.2))
-//                                    .aspectRatio(1.179, contentMode: .fit)
-//
-//                                NetworkImage(url: URL(string: "https://picsum.photos/1340/1136")!) { image in
-//                                    image
-//                                        .resizable()
-//                                        .aspectRatio(contentMode: .fill)
-//                                        .layoutPriority(-1)
-//                                } placeholder: {
-//                                    ZStack {
-//                                        ProgressView()
-//                                            .controlSize(.large)
-//                                    }
-//                                    .aspectRatio(1, contentMode: .fit)
-//                                    .clipped()
-//                                }
-//                            }
-//                            .clipped()
-//                            .clipShape(RoundedRectangle(cornerRadius: 12))
-//                            .padding(.top, 8)
-//                        }
-//                        .padding(.horizontal, 20)
+                        //                        Group {
+                        //                            HStack {
+                        //                                Text(SwirlNameCardDetailFeatureStrings.yourMemories(viewStore.profile.nickname))
+                        //                                    .font(Font.custom("PP Object Sans", size: 16).weight(.medium))
+                        //                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                        //                                Spacer()
+                        //                            }
+                        //                            .padding(.top, 32)
+                        //                            ZStack {
+                        //                                Rectangle()
+                        //                                    .fill(Color.gray.opacity(0.2))
+                        //                                    .aspectRatio(1.179, contentMode: .fit)
+                        //
+                        //                                NetworkImage(url: URL(string: "https://picsum.photos/1340/1136")!) { image in
+                        //                                    image
+                        //                                        .resizable()
+                        //                                        .aspectRatio(contentMode: .fill)
+                        //                                        .layoutPriority(-1)
+                        //                                } placeholder: {
+                        //                                    ZStack {
+                        //                                        ProgressView()
+                        //                                            .controlSize(.large)
+                        //                                    }
+                        //                                    .aspectRatio(1, contentMode: .fit)
+                        //                                    .clipped()
+                        //                                }
+                        //                            }
+                        //                            .clipped()
+                        //                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        //                            .padding(.top, 8)
+                        //                        }
+                        //                        .padding(.horizontal, 20)
 
                         Group {
                             HStack {
@@ -189,14 +194,14 @@ public struct NameCardDetailScreen: View {
                                     .padding(.bottom, 28)
                                 Spacer()
                             }
-//                            HStack {
-//                                Text("Centro Luiz Gonzaga, Rio de Janeiro, Brazil")
-//                                    .font(.system(size: 12))
-//                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-//                                    .padding(.top, 4)
-//                                    .padding(.bottom, 40)
-//                                Spacer()
-//                            }
+                            //                            HStack {
+                            //                                Text("Centro Luiz Gonzaga, Rio de Janeiro, Brazil")
+                            //                                    .font(.system(size: 12))
+                            //                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                            //                                    .padding(.top, 4)
+                            //                                    .padding(.bottom, 40)
+                            //                                Spacer()
+                            //                            }
                         }
                         .padding(.horizontal, 20)
                         VStack(alignment: .center, spacing: 0) {
@@ -254,12 +259,48 @@ public struct NameCardDetailScreen: View {
                     .foregroundColor(SwirlDesignSystemAsset.Colors.defaultGray.swiftUIColor.opacity(0.5))
                     .cornerRadius(3)
                     .padding(.top, 8)
+
+                if viewStore.isDeleting {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                                .controlSize(.large)
+                            Spacer()
+                        }
+                        Spacer()
+                    }
+                    .background(.black.opacity(0.4))
+                    .allowsHitTesting(true)
+                }
             }
             .onAppear {
                 region = MKCoordinateRegion(
                     center: CLLocationCoordinate2D(latitude: viewStore.location.latitude, longitude: viewStore.location.longitude),
                     span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001)
                 )
+            }
+            .alert(
+                isPresented: Binding(
+                    get: { viewStore.isMomentDeleteConfirmAlertPresented },
+                    set: { value in viewStore.send(.onDeleteMomentConfirmAlertPresent(value)) }
+                )
+            ) {
+                Alert(
+                    title: Text(SwirlNameCardDetailFeatureStrings.momentRemoveConfirmTitle),
+                    message: Text(SwirlNameCardDetailFeatureStrings.momentRemoveConfirmDescription),
+                    primaryButton: .destructive(Text(SwirlDesignSystemStrings.yes)) {
+                        viewStore.send(.onDeleteMomentConfirmed)
+                    },
+                    secondaryButton: .cancel(Text(SwirlDesignSystemStrings.cancel))
+                )
+            }
+            .interactiveDismissDisabled(viewStore.isDeleting)
+            .onChange(of: viewStore.requestDismiss) { value in
+                if value {
+                    dismiss()
+                }
             }
         }
     }

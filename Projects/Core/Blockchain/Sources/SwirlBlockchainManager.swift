@@ -515,7 +515,7 @@ final class SwirlBlockchainManager: NSObject {
         print("==== [SwirlBlockchainManager] mint moment successfully. Transaction hash -> \(txWait)")
     }
 
-    func burnAllMoment() async throws {
+    func burnMoment(with id: UInt64) async throws {
         let deviceKeySigner = HyphenDeviceKeySigner()
         let serverKeySigner = HyphenServerKeySigner()
         let payMasterKeySigner = HyphenPayMasterKeySigner()
@@ -528,18 +528,19 @@ final class SwirlBlockchainManager: NSObject {
                 import NonFungibleToken from 0x631e88ae7f1d7c20
                 import SwirlMoment from 0x5969d51aa05825c4
 
-                transaction {
+                transaction(id: UInt64) {
+                    /// Reference that will be used for the owner's collection
                     let collectionRef: &SwirlMoment.Collection
 
                     prepare(signer: AuthAccount) {
+                        // borrow a reference to the owner's collection
                         self.collectionRef = signer.borrow<&SwirlMoment.Collection>(from: SwirlMoment.CollectionStoragePath)
                             ?? panic("Account does not store an object at the specified path")
+
                     }
 
                     execute {
-                        for id in self.collectionRef.getIDs() {
-                            self.collectionRef.burn(id: id)
-                        }
+                        self.collectionRef.burn(id: id)
                     }
                 }
                 """
@@ -547,6 +548,12 @@ final class SwirlBlockchainManager: NSObject {
 
             proposer {
                 Flow.TransactionProposalKey(address: deviceKeySigner.address, keyIndex: 1)
+            }
+
+            arguments {
+                [
+                    .uint64(id),
+                ]
             }
 
             payer {
@@ -562,9 +569,7 @@ final class SwirlBlockchainManager: NSObject {
         let txWait = try await flow.sendTransaction(transaction: signedTx)
         let txResult = try await txWait.onceSealed()
 
-        print("==== [SwirlBlockchainManager] burn all moment successfully. Transaction hash -> \(txWait)")
-
-        _ = try await getNameCardList()
+        print("==== [SwirlBlockchainManager] burn moment successfully. Transaction hash -> \(txWait)")
     }
 }
 
