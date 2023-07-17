@@ -90,7 +90,7 @@ class MPCSession: NSObject, MCSessionDelegate, MCNearbyServiceBrowserDelegate, M
         }
 
         if mcSession.connectedPeers.count < maxNumPeers {
-            start()
+            // start()
         }
     }
 

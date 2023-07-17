@@ -5,24 +5,26 @@ import SwirlModel
 public struct SwirlNameCard: View {
     let profile: SwirlProfile
     let isMyProfile: Bool
+    let hideMet: Bool
     let enablePressAnimation: Bool
     let onClick: () -> Void
 
     public init(
         profile: SwirlProfile,
         isMyProfile: Bool = false,
+        hideMet: Bool = true,
         enablePressAnimation: Bool = true,
         onClick: @escaping () -> Void
     ) {
         self.profile = profile
         self.enablePressAnimation = enablePressAnimation
+        self.hideMet = hideMet
         self.isMyProfile = isMyProfile
         self.onClick = onClick
     }
 
     @GestureState private var press: Bool = false
     @State private var isButtonPressed: Bool = false
-    @State private var date: Date = randomDate()
 
     public var body: some View {
         ZStack {
@@ -32,8 +34,8 @@ public struct SwirlNameCard: View {
                 formatter.amSymbol = "AM"
                 formatter.pmSymbol = "PM"
 
-                let dateString = formatter.string(from: date)
-                let dayComponent = Calendar.current.component(.day, from: date)
+                let dateString = formatter.string(from: Date())
+                let dayComponent = Calendar.current.component(.day, from: Date())
                 let suffix: String
 
                 switch dayComponent {
@@ -52,7 +54,9 @@ public struct SwirlNameCard: View {
 
             SwirlNameCardContent(
                 profile: profile,
-                isMyProfile: isMyProfile
+                isMyProfile: isMyProfile,
+                hideMet: hideMet,
+                formattedTime: formattedTime
             )
             .background(Color(hex: profile.color))
             .clipShape(CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight]))
@@ -60,7 +64,9 @@ public struct SwirlNameCard: View {
 
             SwirlNameCardContent(
                 profile: profile,
-                isMyProfile: isMyProfile
+                isMyProfile: isMyProfile,
+                hideMet: hideMet,
+                formattedTime: formattedTime
             )
             .background(.white)
             .clipShape(CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight]))
@@ -79,6 +85,8 @@ public struct SwirlNameCard: View {
 private struct SwirlNameCardContent: View {
     let profile: SwirlProfile
     let isMyProfile: Bool
+    let hideMet: Bool
+    let formattedTime: String
 
     var body: some View {
         VStack(spacing: 0) {
@@ -130,10 +138,64 @@ private struct SwirlNameCardContent: View {
                     .padding(.horizontal, 16)
                 Spacer()
             }
-            .padding(.bottom, 70)
+            .padding(.bottom, isMyProfile && !hideMet ? 70 : 30)
             .opacity(isMyProfile ? 1.0 : 0.0)
 
-            if !isMyProfile {
+            HStack(spacing: 0) {
+                VStack(spacing: 8) {
+                    HStack(spacing: 4) {
+                        SwirlDesignSystemAsset.Icons.twitterLogo.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18)
+                        Text(getHandle(profile.socialHandles.filter { $0.channel == "twitter" }.first))
+                            .font(.system(size: 12))
+                            .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                        Spacer()
+                    }
+                    .opacity((profile.socialHandles.first { $0.channel == "twitter" }?.handle.isEmpty ?? true) ? 0.2 : 1.0)
+                    HStack(spacing: 4) {
+                        SwirlDesignSystemAsset.Icons.discordLogo.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18)
+                        Text(getHandle(profile.socialHandles.filter { $0.channel == "discord" }.first))
+                            .font(.system(size: 12))
+                            .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                        Spacer()
+                    }
+                    .opacity((profile.socialHandles.first { $0.channel == "discord" }?.handle.isEmpty ?? true) ? 0.2 : 1.0)
+                }
+                Spacer()
+                VStack(spacing: 8) {
+                    HStack(spacing: 4) {
+                        SwirlDesignSystemAsset.Icons.telegramLogo.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18)
+                        Text(getHandle(profile.socialHandles.filter { $0.channel == "telegram" }.first))
+                            .font(.system(size: 12))
+                            .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                        Spacer()
+                    }
+                    .opacity((profile.socialHandles.first { $0.channel == "telegram" }?.handle.isEmpty ?? true) ? 0.2 : 1.0)
+                    HStack(spacing: 4) {
+                        SwirlDesignSystemAsset.Icons.threadsLogo.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18)
+                        Text(getHandle(profile.socialHandles.filter { $0.channel == "thread" }.first))
+                            .font(.system(size: 12))
+                            .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                        Spacer()
+                    }
+                    .opacity((profile.socialHandles.first { $0.channel == "thread" }?.handle.isEmpty ?? true) ? 0.2 : 1.0)
+                }
+                Spacer()
+            }
+            .padding(20)
+
+            if !hideMet {
                 VStack(spacing: 2) {
                     HStack(spacing: 0) {
                         Text(SwirlDesignSystemStrings.youMetAt)
@@ -145,69 +207,15 @@ private struct SwirlNameCardContent: View {
                         Spacer()
                     }
                     HStack(spacing: 0) {
-//                        Text("\(formattedTime) @\(location)")
-                        Text("<TIME NEED / LOCATION NEED>")
+                        Text("\(formattedTime)")
+//                        Text("<TIME NEED / LOCATION NEED>")
                             .font(.system(size: 12))
                             .foregroundColor(Color(red: 0.09, green: 0.09, blue: 0.09))
                         Spacer()
                     }
                     .padding(.bottom, 18)
                 }
-                .padding(.horizontal, 16)
-            } else {
-                HStack(spacing: 0) {
-                    VStack(spacing: 8) {
-                        HStack(spacing: 4) {
-                            SwirlDesignSystemAsset.Icons.twitterLogo.swiftUIImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 18)
-                            Text(getHandle(profile.socialHandles.filter { $0.channel == "twitter" }.first!))
-                                .font(.system(size: 12))
-                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                            Spacer()
-                        }
-                        .opacity(profile.socialHandles.first { $0.channel == "twitter" }!.handle.isEmpty ? 0.2 : 1.0)
-                        HStack(spacing: 4) {
-                            SwirlDesignSystemAsset.Icons.discordLogo.swiftUIImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 18)
-                            Text(getHandle(profile.socialHandles.filter { $0.channel == "discord" }.first!))
-                                .font(.system(size: 12))
-                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                            Spacer()
-                        }
-                        .opacity(profile.socialHandles.first { $0.channel == "discord" }!.handle.isEmpty ? 0.2 : 1.0)
-                    }
-                    Spacer()
-                    VStack(spacing: 8) {
-                        HStack(spacing: 4) {
-                            SwirlDesignSystemAsset.Icons.telegramLogo.swiftUIImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 18)
-                            Text(getHandle(profile.socialHandles.filter { $0.channel == "telegram" }.first!))
-                                .font(.system(size: 12))
-                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                            Spacer()
-                        }
-                        .opacity(profile.socialHandles.first { $0.channel == "telegram" }!.handle.isEmpty ? 0.2 : 1.0)
-                        HStack(spacing: 4) {
-                            SwirlDesignSystemAsset.Icons.threadsLogo.swiftUIImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 18)
-                            Text(getHandle(profile.socialHandles.filter { $0.channel == "thread" }.first!))
-                                .font(.system(size: 12))
-                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                            Spacer()
-                        }
-                        .opacity(profile.socialHandles.first { $0.channel == "thread" }!.handle.isEmpty ? 0.2 : 1.0)
-                    }
-                    Spacer()
-                }
-                .padding(20)
+                .padding(.horizontal, 20)
             }
         }
         .customCornerRadius(24, corners: [.topRight, .bottomLeft, .bottomRight])
@@ -217,11 +225,15 @@ private struct SwirlNameCardContent: View {
         )
     }
 
-    func getHandle(_ handle: SwirlProfile.SocialHandle) -> String {
-        if handle.handle.isEmpty {
+    func getHandle(_ handle: SwirlProfile.SocialHandle?) -> String {
+        if handle == nil {
+            return "Not Set"
+        }
+
+        if handle!.handle.isEmpty {
             return "Not Set"
         } else {
-            return handle.handle
+            return handle!.handle
         }
     }
 }

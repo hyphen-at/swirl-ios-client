@@ -16,6 +16,8 @@ let project = Project.makeModule(
                     .external(name: "SwiftUIIntrospect"),
                     .external(name: "ComposableArchitecture"),
                     .external(name: "Dependencies"),
+                    .external(name: "LookingGlassUI"),
+                    .external(name: "PartialSheet"),
                     // .framework(path: .relativeToRoot("PrebuiltFrameworks/NearbyCoreAdapter.framework")),
                     .framework(path: .relativeToRoot("PrebuiltFrameworks/NearbyConnections.framework")),
                     .shared(implements: .DesignSystem),

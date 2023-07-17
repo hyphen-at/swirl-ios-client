@@ -1,17 +1,23 @@
 import ComposableArchitecture
+import LookingGlassUI
 import MultipeerConnectivity
 import NearbyInteraction
 import NetworkImage
+import PartialSheet
 import SwiftUI
 import SwiftUIIntrospect
 import SwirlDesignSystem
 import SwirlModel
+
+// proposer
 
 public struct NameCardListScreen: View {
     let store: StoreOf<NameCardList>
 
     @State private var isShakeEnabled = false
     @StateObject private var deviceInteractor: SwirlDeviceInteractor = .init()
+
+    @State private var isMomentConfirmationSheetPresented: Bool = false
 
     public init(
         store: StoreOf<NameCardList>
@@ -115,9 +121,15 @@ public struct NameCardListScreen: View {
                             onClick: {}
                         )
                         .padding(.top, 60)
-                        .padding(.horizontal, 12)
+                        .padding(.horizontal, 8)
+                        .parallax(multiplier: 10, maxOffset: 60)
+                        .shimmer(color: Color(hex: viewStore.profiles.first!.color)!.opacity(0.9))
                         Button(action: {
                             isShakeEnabled = false
+
+                            deviceInteractor.session?.invalidate()
+                            deviceInteractor.mpc?.invalidate()
+                            deviceInteractor.sessionClear()
 
                             let generator = UINotificationFeedbackGenerator()
                             generator.notificationOccurred(.success)
@@ -131,15 +143,88 @@ public struct NameCardListScreen: View {
                         Spacer()
                     }
                     .background(
-                        Color(red: 0.43, green: 0.95, blue: 0.91)
+                        Color(hex: viewStore.profiles.first!.color)
                             .opacity(0.3)
                     )
                     .edgesIgnoringSafeArea(.all)
+                    .onChange(of: deviceInteractor.peerNameCard) { value in
+                        isMomentConfirmationSheetPresented = value != nil
+                    }
                     .onAppear {
                         let generator = UINotificationFeedbackGenerator()
                         generator.notificationOccurred(.success)
 
-                        deviceInteractor.startup()
+                        deviceInteractor.startup(myNameCard: viewStore.profiles.first!)
+                    }
+                    .partialSheet(
+                        isPresented: $isMomentConfirmationSheetPresented,
+                        iPhoneStyle: PSIphoneStyle(
+                            background: .solid(Color(hex: "#F3F7F8")!.opacity(0.97)),
+                            handleBarStyle: .none,
+                            cover: .enabled(.black.opacity(0.4)),
+                            cornerRadius: 24
+                        )
+                    ) {
+                        VStack {
+                            Text(SwirlNameCardListFeatureStrings.confirmToSwirl)
+                                .font(.system(size: 24).weight(.medium))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.black)
+                                .padding(.top, 40)
+                            Text(SwirlNameCardListFeatureStrings.confirmToSwirlDescription(deviceInteractor.peerNameCard?.nickname ?? ""))
+                                .font(.system(size: 13).weight(.medium))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.black)
+                                .padding(.top, 13)
+
+                            if let peerNameCard = deviceInteractor.peerNameCard {
+                                SwirlNameCard(
+                                    profile: peerNameCard,
+                                    isMyProfile: false,
+                                    hideMet: false,
+                                    onClick: {}
+                                )
+                                .padding(.horizontal, 8)
+                                .padding(.top, 30)
+                            }
+                            Button(action: {}) {
+                                Text(SwirlDesignSystemStrings.confirm)
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 14)
+                                    .background(Color(red: 0, green: 0.48, blue: 1))
+                                    .cornerRadius(12)
+                                    .padding(.top, 14)
+                            }
+                            .padding(.top, 30)
+                            Button(action: {
+                                isMomentConfirmationSheetPresented = false
+                                isShakeEnabled = false
+
+                                deviceInteractor.session?.invalidate()
+                                deviceInteractor.mpc?.invalidate()
+                                deviceInteractor.sessionClear()
+
+                                let generator = UINotificationFeedbackGenerator()
+                                generator.notificationOccurred(.success)
+                            }) {
+                                Text(SwirlDesignSystemStrings.cancel)
+                                    .font(.system(size: 17))
+                            }
+                            .padding(.top, 14)
+                            .padding(.bottom, 23)
+                        }
+                        .onDisappear {
+                            isShakeEnabled = false
+
+                            deviceInteractor.session?.invalidate()
+                            deviceInteractor.mpc?.invalidate()
+                            deviceInteractor.sessionClear()
+
+                            let generator = UINotificationFeedbackGenerator()
+                            generator.notificationOccurred(.success)
+                        }
                     }
                 }
             }
@@ -163,5 +248,6 @@ public struct NameCardListScreen: View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
+        .motionManager(updateInterval: 0.1, disabled: false)
     }
 }

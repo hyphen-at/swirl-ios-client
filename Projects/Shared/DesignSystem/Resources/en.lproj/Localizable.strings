@@ -6,3 +6,6 @@ LOGIN_GOOGLE = "Continue with Google";
 EDIT = "Edit";
 
 MY_PROFILE = "My Profile";
+
+CONFIRM = "Confirm";
+CANCEL = "Cancel";

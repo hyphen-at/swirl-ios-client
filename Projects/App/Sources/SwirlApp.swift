@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import Feature
+import PartialSheet
 import SwiftUI
 import TCACoordinators
 
@@ -43,5 +44,6 @@ struct SwirlApp: View {
                 }
             }
         }
+        .attachPartialSheetToRoot()
     }
 }

@@ -1,10 +1,12 @@
+import Foundation
 import MultipeerConnectivity
 import NearbyInteraction
 import SwiftUI
+import SwirlModel
 
 class SwirlDeviceInteractor: NSObject, ObservableObject, NISessionDelegate {
-    private var mpc: MPCSession? = nil
-    private var session: NISession? = nil
+    var mpc: MPCSession? = nil
+    var session: NISession? = nil
     private var peerDiscoveryToken: NIDiscoveryToken? = nil
     private var connectedPeer: MCPeerID? = nil
     private var sharedTokenWithPeer = false
@@ -17,7 +19,13 @@ class SwirlDeviceInteractor: NSObject, ObservableObject, NISessionDelegate {
 
     private var isConnecting = false
 
-    func startup() {
+    private var myNameCard: SwirlProfile? = nil
+
+    @Published var peerNameCard: SwirlProfile? = nil
+
+    func startup(myNameCard: SwirlProfile) {
+        self.myNameCard = myNameCard
+
         // Create the NISession.
         session = NISession()
 
@@ -28,24 +36,25 @@ class SwirlDeviceInteractor: NSObject, ObservableObject, NISessionDelegate {
         sharedTokenWithPeer = false
 
         // If `connectedPeer` exists, share the discovery token, if needed.
-        if connectedPeer != nil && mpc != nil {
-            if let myToken = session?.discoveryToken {
-                print("Initializing...")
-                if !sharedTokenWithPeer {
-                    shareMyDiscoveryToken(token: myToken)
-                }
-                guard let peerToken = peerDiscoveryToken else {
-                    return
-                }
-                let config = NINearbyPeerConfiguration(peerToken: peerToken)
-                session?.run(config)
-            } else {
-                fatalError("Unable to get self discovery token, is this session invalidated?")
-            }
-        } else {
-            print("Discovering Peer...")
-            startupMPC()
-        }
+//        if connectedPeer != nil && mpc != nil {
+//            if let myToken = session?.discoveryToken {
+//                print("Initializing...")
+//                if !sharedTokenWithPeer {
+//                    shareMyDiscoveryToken(token: myToken)
+//                }
+//                guard let peerToken = peerDiscoveryToken else {
+//                    return
+//                }
+//                let config = NINearbyPeerConfiguration(peerToken: peerToken)
+//                session?.run(config)
+//            } else {
+//                fatalError("Unable to get self discovery token, is this session invalidated?")
+//            }
+//        } else {
+//            print("Discovering Peer...")
+//            startupMPC()
+//        }
+        startupMPC()
     }
 
     public func session(_ session: NISession, didUpdate nearbyObjects: [NINearbyObject]) {
@@ -68,14 +77,27 @@ class SwirlDeviceInteractor: NSObject, ObservableObject, NISessionDelegate {
         if nearbyObjectUpdate.distance! < 0.2, !isConnecting {
             isConnecting = true
 
-            mpc?.invalidate()
+            mpc!.invalidate()
             session.invalidate()
+
             print("============ Data Connection Established")
             SwirlNearbyConnectionManager.shared.onMessageReceived = {
                 self.message = $0
                 self.isConnecting = false
+
+                let peerNameCard = try! JSONDecoder().decode(SwirlProfile.self, from: self.message.data(using: .utf8)!)
+                self.peerNameCard = peerNameCard
+
+                print("=== [DataReceived] -> \(peerNameCard)")
             }
-            SwirlNearbyConnectionManager.shared.start(myToken: myToken, peerToken: self.peerToken)
+
+            let encodedNameCard = try! JSONEncoder().encode(myNameCard)
+
+            SwirlNearbyConnectionManager.shared.start(
+                myToken: myToken,
+                peerToken: self.peerToken,
+                myProfileJsonString: String(data: encodedNameCard, encoding: .utf8)!
+            )
         }
 //
 //        print(String(format: "%0.2f m", nearbyObjectUpdate.distance!))
@@ -209,5 +231,11 @@ class SwirlDeviceInteractor: NSObject, ObservableObject, NISessionDelegate {
 
         // Run the session.
         session?.run(config)
+    }
+
+    func sessionClear() {
+        isConnecting = false
+        SwirlNearbyConnectionManager.shared.invalidate()
+        peerNameCard = nil
     }
 }

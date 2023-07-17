@@ -1,41 +1,52 @@
 import HyphenCore
 import NearbyConnections
+import NearbyCoreAdapter
 import SwiftUI
 
 class SwirlNearbyConnectionManager: ObservableObject {
     public static let shared: SwirlNearbyConnectionManager = .init()
 
-    let connectionManager: ConnectionManager
-    let advertiser: Advertiser
-    let discoverer: Discoverer
+    var connectionManager: ConnectionManager? = nil
+    var advertiser: Advertiser? = nil
+    var discoverer: Discoverer? = nil
 
     var myToken: String = ""
     var peerToken: String = ""
+
+    var myProfileJsonString: String = ""
+
+    private var internalIndex = 1
 
     var onMessageReceived: (String) -> Void = { _ in }
 
     private init() {
         connectionManager = ConnectionManager(serviceID: "at.hyphen.Swirl", strategy: .pointToPoint)
-        advertiser = Advertiser(connectionManager: connectionManager)
-        discoverer = Discoverer(connectionManager: connectionManager)
-
-        connectionManager.delegate = self
-        advertiser.delegate = self
-        discoverer.delegate = self
     }
 
-    func start(myToken: String, peerToken: String) {
+    func start(myToken: String, peerToken: String, myProfileJsonString: String) {
         self.myToken = myToken
         self.peerToken = peerToken
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.advertiser.startAdvertising(using: myToken.data(using: .utf8)!) { error in
-                print(error)
-            }
-            self.discoverer.startDiscovery { error in
-                print(error)
-            }
-        }
+        self.myProfileJsonString = myProfileJsonString
+
+        advertiser = Advertiser(connectionManager: connectionManager!)
+        discoverer = Discoverer(connectionManager: connectionManager!)
+
+        connectionManager?.delegate = self
+        advertiser?.delegate = self
+        discoverer?.delegate = self
+
+        advertiser?.startAdvertising(using: myToken.data(using: .utf8)!)
+        discoverer?.startDiscovery()
+    }
+
+    func invalidate() {
+        advertiser?.stopAdvertising()
+        discoverer?.stopDiscovery()
+
+        advertiser = nil
+        // connectionManager = nil
+        discoverer = nil
     }
 }
 
@@ -94,7 +105,7 @@ extension SwirlNearbyConnectionManager: ConnectionManagerDelegate {
         case .connected:
             print("CONNECTED")
             print("========= [DeviceConnected] \(device)")
-            manager.send("HelloWorld!!!!!".data(using: .utf8)!, to: [device]) {
+            manager.send(myProfileJsonString.data(using: .utf8)!, to: [device]) {
                 print("========= [SendComplete] \($0)")
             }
         case .disconnected:
@@ -121,11 +132,12 @@ extension SwirlNearbyConnectionManager: DiscovererDelegate {
         _: Discoverer, didFind id: EndpointID, with context: Data
     ) {
         let peerDevice = String(data: context, encoding: .utf8)!
+        print("==== [CONNECTING DEVICE] =====")
 
         if peerDevice == peerToken {
-            discoverer.stopDiscovery()
-            advertiser.stopAdvertising()
-            discoverer.requestConnection(to: id, using: myToken.data(using: .utf8)!) {
+            discoverer?.stopDiscovery()
+            advertiser?.stopAdvertising()
+            discoverer?.requestConnection(to: id, using: myToken.data(using: .utf8)!) {
                 print($0)
             }
         }

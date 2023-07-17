@@ -1,3 +1,6 @@
 TUTORIAL_CTA = "How can I SWIRL my card?";
 
 READY_TO_SWIRL = "Ready to Swirl";
+
+CONFIRM_TO_SWIRL = "Confirm to SWIRL";
+CONFIRM_TO_SWIRL_DESCRIPTION = "Press confirm and\nSWIRL with %@";

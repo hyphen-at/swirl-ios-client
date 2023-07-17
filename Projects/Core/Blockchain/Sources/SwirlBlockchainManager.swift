@@ -30,7 +30,7 @@ final class SwirlBlockchainManager: NSObject {
         }
 
         let script = Flow.Script(text: """
-        import SwirlNametag from 0xfe9604dcbf6b270e
+        import SwirlNametag from 0x5969d51aa05825c4
 
         /// Retrieve the SwirlNametag.Profile from the given address.
         /// If nametag doesn't exist on the address, it returns nil.
@@ -67,8 +67,8 @@ final class SwirlBlockchainManager: NSObject {
 
     func getNameCardList() async throws -> [SwirlProfile] {
         let script = Flow.Script(text: """
-        import SwirlNametag from 0xfe9604dcbf6b270e
-        import SwirlMoment from 0xfe9604dcbf6b270e
+        import SwirlNametag from 0x5969d51aa05825c4
+        import SwirlMoment from 0x5969d51aa05825c4
 
         /// Retrieve the SwirlNametag.Profile from the given address.
         /// If nametag doesn't exist on the address, it returns nil.
@@ -132,8 +132,8 @@ final class SwirlBlockchainManager: NSObject {
                 """
                 import NonFungibleToken from 0x631e88ae7f1d7c20
                 import MetadataViews from 0x631e88ae7f1d7c20
-                import SwirlMoment from 0xfe9604dcbf6b270e
-                import SwirlNametag from 0xfe9604dcbf6b270e
+                import SwirlMoment from 0x5969d51aa05825c4
+                import SwirlNametag from 0x5969d51aa05825c4
 
                 /// Sets up collections of SwirlMoment, SwirlNametag for an account so it can receive these NFTs,
                 /// and mints a SwirlNametag which acts as the account's profile.
@@ -244,10 +244,10 @@ final class SwirlBlockchainManager: NSObject {
 
         let signedTx = try await unsignedTx.sign(signers: signers)
         let txWait = try await flow.sendTransaction(transaction: signedTx)
-        let txResult = try await txWait.onceFinalized()
+        let txResult = try await txWait.onceSealed()
 
         print(txResult.blockId)
-        print("==== [SwirlBlockchainManager] create namecard transaction complete. Transaction hash -> \(txResult.blockId)")
+        print("==== [SwirlBlockchainManager] create namecard transaction complete. Transaction hash -> \(txWait)")
 
         _ = try await getMyNameCard()
     }
@@ -271,7 +271,7 @@ final class SwirlBlockchainManager: NSObject {
         var unsignedTx = try! await flow.buildTransaction {
             cadence {
                 """
-                import SwirlNametag from 0xfe9604dcbf6b270e
+                import SwirlNametag from 0x5969d51aa05825c4
 
                 /// Updates existing nametag.
                 transaction(
@@ -365,8 +365,7 @@ final class SwirlBlockchainManager: NSObject {
 
         let signedTx = try await unsignedTx.sign(signers: signers)
         let txWait = try await flow.sendTransaction(transaction: signedTx)
-        let txResult = try await txWait.onceFinalized()
-
-        print(txResult.blockId)
+        print(txWait)
+        let txResult = try await txWait.onceSealed()
     }
 }

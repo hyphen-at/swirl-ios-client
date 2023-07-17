@@ -33,7 +33,19 @@ let targets: [Target] = [
                     "NSNearbyInteractionAllowOnceUsageDescription": "Use to share the SWIRL Name Card.",
                     "NSNearbyInteractionUsageDescription": "Use to share the SWIRL Name Card.",
                     "NSFaceIDUsageDescription": "Signing transaction with device key.",
-                    "NSBonjourServices": ["_248FAD1DE957._tcp", "_swirl._tcp"],
+                    "NSBonjourServices": [
+                        "_248FAD1DE957._tcp",
+                        "_D6CCA016471B._tcp",
+                        "_A2FAF6ABA9AC._tcp",
+                        "_A65786BA6FC7._tcp",
+                        "_9101F4AEC3C7._tcp",
+                        "_6079B623FC36._tcp",
+                        "_094E97DB7015._tcp",
+                        "_23FB05BE42E9._tcp",
+                        "_8A1BACF7B82A._tcp",
+                        "_8F262562DC3C._tcp",
+                        "_swirl._tcp",
+                    ],
                 ]
             ),
             sources: [
