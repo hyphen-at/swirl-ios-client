@@ -20,8 +20,8 @@ public struct SwirlCardStackView: UIViewControllerRepresentable {
         stackedLayout.isFillingHeight = true
         stackedLayout.movingItemOnTop = true
         stackedLayout.topReveal = 80
-        stackedLayout.itemSize = CGSize(width: 0, height: 250)
-        stackedLayout.layoutMargin = .init(top: 0, left: 8, bottom: 120, right: 8)
+        stackedLayout.itemSize = CGSize(width: 0, height: 240)
+        stackedLayout.layoutMargin = .init(top: 10, left: 8, bottom: 120, right: 8)
 
         let viewController = SwirlCardStackViewController(collectionViewLayout: stackedLayout)
         viewController.onNameCardClick = onNameCardClick

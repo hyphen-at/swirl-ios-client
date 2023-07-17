@@ -1,3 +1,4 @@
+import NetworkImage
 import SwiftUI
 import SwirlModel
 
@@ -50,10 +51,7 @@ public struct SwirlNameCard: View {
             }
 
             SwirlNameCardContent(
-                name: profile.nickname,
-                profileUrl: profile.profileImage,
-                formattedTime: formattedTime,
-                location: "",
+                profile: profile,
                 isMyProfile: isMyProfile
             )
             .background(Color(hex: profile.color))
@@ -61,10 +59,7 @@ public struct SwirlNameCard: View {
             .offset(x: 4, y: 4)
 
             SwirlNameCardContent(
-                name: profile.nickname,
-                profileUrl: profile.profileImage,
-                formattedTime: formattedTime,
-                location: "",
+                profile: profile,
                 isMyProfile: isMyProfile
             )
             .background(.white)
@@ -82,23 +77,45 @@ public struct SwirlNameCard: View {
 }
 
 private struct SwirlNameCardContent: View {
-    let name: String
-    let profileUrl: String
-    let formattedTime: String
-    let location: String
+    let profile: SwirlProfile
     let isMyProfile: Bool
 
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
-                Text(name)
+                Text(profile.nickname)
                     .font(Font.custom("PP Object Sans", size: 40).weight(.medium))
                     .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
                     .padding(.leading, 16)
                 Spacer()
-                SwirlDesignSystemAsset.Images.cardDefaultProfile.swiftUIImage
-                    .frame(width: 48, height: 48)
-                    .padding(12)
+
+                ZStack {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.2))
+                        .aspectRatio(1, contentMode: .fit)
+
+                    NetworkImage(url: URL(string: profile.profileImage)!) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .layoutPriority(-1)
+                    } placeholder: {
+                        ZStack {
+                            ProgressView()
+                                .controlSize(.mini)
+                        }
+                        .aspectRatio(1, contentMode: .fit)
+                        .clipped()
+                    }
+                }
+                .clipped()
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .inset(by: 0.5)
+                        .stroke(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor, lineWidth: 1))
+                .frame(width: 48, height: 48)
+                .padding(12)
             }
             HStack {
                 Text(SwirlDesignSystemStrings.myProfile)
@@ -111,33 +128,99 @@ private struct SwirlNameCardContent: View {
                     .padding(.horizontal, 16)
                 Spacer()
             }
-            .padding(.bottom, 89)
+            .padding(.bottom, 70)
             .opacity(isMyProfile ? 1.0 : 0.0)
-            VStack(spacing: 2) {
+
+            if !isMyProfile {
+                VStack(spacing: 2) {
+                    HStack(spacing: 0) {
+                        Text(SwirlDesignSystemStrings.youMetAt)
+                            .font(
+                                Font.custom("PP Object Sans", size: 12)
+                                    .weight(.bold)
+                            )
+                            .foregroundColor(Color(red: 0.09, green: 0.09, blue: 0.09))
+                        Spacer()
+                    }
+                    HStack(spacing: 0) {
+//                        Text("\(formattedTime) @\(location)")
+                        Text("<TIME NEED / LOCATION NEED>")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color(red: 0.09, green: 0.09, blue: 0.09))
+                        Spacer()
+                    }
+                    .padding(.bottom, 18)
+                }
+                .padding(.horizontal, 16)
+            } else {
                 HStack(spacing: 0) {
-                    Text(SwirlDesignSystemStrings.youMetAt)
-                        .font(
-                            Font.custom("PP Object Sans", size: 12)
-                                .weight(.bold)
-                        )
-                        .foregroundColor(Color(red: 0.09, green: 0.09, blue: 0.09))
+                    VStack(spacing: 8) {
+                        HStack(spacing: 4) {
+                            SwirlDesignSystemAsset.Icons.twitterLogo.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18)
+                            Text(getHandle(profile.socialHandles.filter { $0.channel == "twitter" }.first!))
+                                .font(.system(size: 12))
+                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                            Spacer()
+                        }
+                        .opacity(profile.socialHandles.first { $0.channel == "twitter" }!.handle.isEmpty ? 0.2 : 1.0)
+                        HStack(spacing: 4) {
+                            SwirlDesignSystemAsset.Icons.discordLogo.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18)
+                            Text(getHandle(profile.socialHandles.filter { $0.channel == "discord" }.first!))
+                                .font(.system(size: 12))
+                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                            Spacer()
+                        }
+                        .opacity(profile.socialHandles.first { $0.channel == "discord" }!.handle.isEmpty ? 0.2 : 1.0)
+                    }
+                    Spacer()
+                    VStack(spacing: 8) {
+                        HStack(spacing: 4) {
+                            SwirlDesignSystemAsset.Icons.telegramLogo.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18)
+                            Text(getHandle(profile.socialHandles.filter { $0.channel == "telegram" }.first!))
+                                .font(.system(size: 12))
+                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                            Spacer()
+                        }
+                        .opacity(profile.socialHandles.first { $0.channel == "telegram" }!.handle.isEmpty ? 0.2 : 1.0)
+                        HStack(spacing: 4) {
+                            SwirlDesignSystemAsset.Icons.threadsLogo.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18)
+                            Text(getHandle(profile.socialHandles.filter { $0.channel == "thread" }.first!))
+                                .font(.system(size: 12))
+                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                            Spacer()
+                        }
+                        .opacity(profile.socialHandles.first { $0.channel == "thread" }!.handle.isEmpty ? 0.2 : 1.0)
+                    }
                     Spacer()
                 }
-                HStack(spacing: 0) {
-                    Text("\(formattedTime) @\(location)")
-                        .font(.system(size: 12))
-                        .foregroundColor(Color(red: 0.09, green: 0.09, blue: 0.09))
-                    Spacer()
-                }
-                .padding(.bottom, 18)
+                .padding(20)
             }
-            .padding(.horizontal, 16)
         }
         .customCornerRadius(24, corners: [.topRight, .bottomLeft, .bottomRight])
         .overlay(
             CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight])
                 .stroke(.black, lineWidth: 2)
         )
+    }
+
+    func getHandle(_ handle: SwirlProfile.SocialHandle) -> String {
+        if handle.handle.isEmpty {
+            return "Not Set"
+        } else {
+            return handle.handle
+        }
     }
 }
 

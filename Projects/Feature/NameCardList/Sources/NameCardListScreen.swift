@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import MultipeerConnectivity
 import NearbyInteraction
+import NetworkImage
 import SwiftUI
 import SwiftUIIntrospect
 import SwirlDesignSystem
@@ -32,19 +33,46 @@ public struct NameCardListScreen: View {
                                 .scaledToFit()
                                 .frame(height: 30)
                             Spacer()
-                            Button(action: {}) {
-                                SwirlDesignSystemAsset.Images.cardDefaultProfile.swiftUIImage
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 40)
+
+                            if let profile = viewStore.profiles.first {
+                                Button(action: {}) {
+                                    ZStack {
+                                        Rectangle()
+                                            .fill(Color.gray.opacity(0.2))
+                                            .aspectRatio(1, contentMode: .fit)
+
+                                        NetworkImage(url: URL(string: profile.profileImage)!) { image in
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .layoutPriority(-1)
+                                        } placeholder: {
+                                            ZStack {
+                                                ProgressView()
+                                                    .controlSize(.mini)
+                                            }
+                                            .aspectRatio(1, contentMode: .fit)
+                                            .clipped()
+                                        }
+                                    }
+                                    .clipped()
                                     .clipShape(Circle())
+                                    .overlay(
+                                        Circle()
+                                            .inset(by: 0.5)
+                                            .stroke(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor, lineWidth: 1))
+                                    .frame(width: 40)
+                                }
                             }
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 13)
 
                         SwirlCardStackView(
-                            profiles: .constant(viewStore.profiles),
+                            profiles: Binding(
+                                get: { viewStore.profiles },
+                                set: { _ in }
+                            ),
                             onNameCardClick: { profile in
                                 viewStore.send(.onNameCardClick(profile: profile))
                             }

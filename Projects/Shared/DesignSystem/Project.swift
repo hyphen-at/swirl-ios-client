@@ -15,6 +15,7 @@ let project = Project.makeModule(
                 ],
                 dependencies: [
                     .external(name: "SnapKit-Dynamic"),
+                    .external(name: "NetworkImage"),
                     .shared(implements: .Model),
                 ]
             )

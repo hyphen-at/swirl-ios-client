@@ -20,6 +20,7 @@ let project = Project.makeModule(
                     .framework(path: .relativeToRoot("PrebuiltFrameworks/NearbyConnections.framework")),
                     .shared(implements: .DesignSystem),
                     .shared(implements: .Model),
+                    .core(implements: .Blockchain),
                 ]
             )
         ),
