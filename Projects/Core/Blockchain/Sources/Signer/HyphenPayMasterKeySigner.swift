@@ -14,6 +14,8 @@ final class HyphenPayMasterKeySigner: FlowSigner {
     }
 
     func sign(transaction _: Flow.Transaction, signableData: Data) async throws -> Data {
+        print("===== [HyphenSigner] HyphenPayMasterKey signing request")
+
         let signResult = try await HyphenNetworking.shared.signTransactionWithPayMasterKey(message: signableData.hexValue)
         return Data(hexString: signResult.signature.signature)!
     }

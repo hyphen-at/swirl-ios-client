@@ -94,18 +94,20 @@ private struct SwirlNameCardContent: View {
                         .fill(Color.gray.opacity(0.2))
                         .aspectRatio(1, contentMode: .fit)
 
-                    NetworkImage(url: URL(string: profile.profileImage)!) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .layoutPriority(-1)
-                    } placeholder: {
-                        ZStack {
-                            ProgressView()
-                                .controlSize(.mini)
+                    if !profile.profileImage.isEmpty {
+                        NetworkImage(url: URL(string: profile.profileImage)!) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .layoutPriority(-1)
+                        } placeholder: {
+                            ZStack {
+                                ProgressView()
+                                    .controlSize(.mini)
+                            }
+                            .aspectRatio(1, contentMode: .fit)
+                            .clipped()
                         }
-                        .aspectRatio(1, contentMode: .fit)
-                        .clipped()
                     }
                 }
                 .clipped()

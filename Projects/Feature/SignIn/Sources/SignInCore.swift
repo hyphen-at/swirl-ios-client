@@ -44,12 +44,16 @@ public struct SignIn: ReducerProtocol {
                 return .run { dispatch in
                     try await blockchainClient.fetchFlowAccount()
 
-                    let myProfile = try await blockchainClient.getMyNameCard()
+                    do {
+                        let myProfile = try await blockchainClient.getMyNameCard()
 
-                    if myProfile == nil {
+                        if myProfile == nil {
+                            await dispatch(.onNameCardCreateNeed)
+                        } else {
+                            await dispatch(.goToNameCardList)
+                        }
+                    } catch {
                         await dispatch(.onNameCardCreateNeed)
-                    } else {
-                        await dispatch(.goToNameCardList)
                     }
                 }
             case .onSignInNeed:
@@ -60,6 +64,7 @@ public struct SignIn: ReducerProtocol {
                 return .run { dispatch in
                     do {
                         try await authClient.signInWithGoogle()
+                        await dispatch(.onLoggedIn)
                     } catch {
                         await dispatch(.onError)
                     }

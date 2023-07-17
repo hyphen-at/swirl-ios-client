@@ -18,6 +18,7 @@ let project = Project.makeModule(
                     .external(name: "Dependencies"),
                     .external(name: "NavigationTransitions"),
                     .shared(implements: .DesignSystem),
+                    .core(implements: .Blockchain),
                 ]
             )
         ),

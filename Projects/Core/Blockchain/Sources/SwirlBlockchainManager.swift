@@ -6,7 +6,7 @@ import SwirlModel
 final class SwirlBlockchainManager: NSObject {
     static let shared: SwirlBlockchainManager = .init()
 
-    private var flowAccount: Flow.Account? = nil
+    var flowAccount: Flow.Account? = nil
 
     private var myNameCard: SwirlProfile? = nil
 
@@ -111,7 +111,16 @@ final class SwirlBlockchainManager: NSObject {
         return decodeResult
     }
 
-    func createMyNameCard() async throws {
+    func createMyNameCard(
+        nickname: String,
+        profileImage: String,
+        keywords: [String],
+        color: String,
+        twitterHandle: String?,
+        telegramHandle: String?,
+        discordHandle: String?,
+        threadHandle: String?
+    ) async throws {
         let deviceKeySigner = HyphenDeviceKeySigner()
         let serverKeySigner = HyphenServerKeySigner()
         let payMasterKeySigner = HyphenPayMasterKeySigner()
@@ -213,14 +222,14 @@ final class SwirlBlockchainManager: NSObject {
 
             arguments {
                 [
-                    .string("Doooooooora"),
-                    .string("https://storage.googleapis.com/nftimagebucket/tokens/0x598585fe8724d7ea3f527ddf712c2faa205dabe7/preview/1875.png"),
-                    .array([.string("dora"), .string("developer")]),
-                    .string("#ec137f"),
-                    .optional(.string("")),
-                    .optional(.string("")),
-                    .optional(.string("owl_midnight")),
-                    .optional(.string("")),
+                    .string(nickname),
+                    .string(profileImage),
+                    .array(keywords.map { .string($0) }),
+                    .string("#\(color)"),
+                    .optional(.string(twitterHandle ?? "")),
+                    .optional(.string(telegramHandle ?? "")),
+                    .optional(.string(discordHandle ?? "")),
+                    .optional(.string(threadHandle ?? "")),
                 ]
             }
 
@@ -234,9 +243,13 @@ final class SwirlBlockchainManager: NSObject {
         }
 
         let signedTx = try await unsignedTx.sign(signers: signers)
-        let result = try await flow.sendTransaction(transaction: signedTx)
+        let txWait = try await flow.sendTransaction(transaction: signedTx)
+        let txResult = try await txWait.onceFinalized()
 
-        print(result)
+        print(txResult.blockId)
+        print("==== [SwirlBlockchainManager] create namecard transaction complete. Transaction hash -> \(txResult.blockId)")
+
+        _ = try await getMyNameCard()
     }
 
     func updateMyNameCard(
@@ -351,8 +364,9 @@ final class SwirlBlockchainManager: NSObject {
         }
 
         let signedTx = try await unsignedTx.sign(signers: signers)
-        let result = try await flow.sendTransaction(transaction: signedTx)
+        let txWait = try await flow.sendTransaction(transaction: signedTx)
+        let txResult = try await txWait.onceFinalized()
 
-        print(result)
+        print(txResult.blockId)
     }
 }

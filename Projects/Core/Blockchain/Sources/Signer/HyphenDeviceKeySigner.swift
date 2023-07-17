@@ -12,6 +12,7 @@ final class HyphenDeviceKeySigner: FlowSigner {
     }
 
     func sign(transaction _: Flow.Transaction, signableData: Data) async throws -> Data {
-        HyphenCryptography.signData(signableData)!
+        print("===== [HyphenSigner] HyphenDeviceKey signing request")
+        return HyphenCryptography.signData(signableData)!
     }
 }

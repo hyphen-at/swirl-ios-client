@@ -19,108 +19,128 @@ public struct MakeProfileScreen: View {
     @State var threadsHandle: String = ""
     @State var keywords: String = ""
 
+    @State var color: Color = .init(hue: Double.random(in: 0 ... 1), saturation: 0.62, brightness: 1)
+
     @State private var showingImagePicker = false
     @State private var inputImage: UIImage? = nil
 
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            VStack {
-                ScrollView {
-                    VStack(spacing: 0) {
-                        HStack {
-                            Text(SwirlMakeProfileFeatureStrings.letsMake)
-                                .font(Font.custom("PP Object Sans", size: 32).weight(.medium))
-                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                            Spacer()
+            ZStack {
+                VStack {
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            HStack {
+                                Text(SwirlMakeProfileFeatureStrings.letsMake)
+                                    .font(Font.custom("PP Object Sans", size: 32).weight(.medium))
+                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                                Spacer()
+                            }
+                            .padding(.top, 8)
+                            HStack {
+                                Text(SwirlMakeProfileFeatureStrings.letsMakeDescription)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                                Spacer()
+                            }
+                            .padding(.top, 8)
                         }
-                        .padding(.top, 8)
-                        HStack {
-                            Text(SwirlMakeProfileFeatureStrings.letsMakeDescription)
-                                .font(.system(size: 14))
-                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                            Spacer()
-                        }
-                        .padding(.top, 8)
-                    }
-                    .padding(.horizontal, 20)
-                    ZStack {
-                        MakeProfileCardContent(
-                            nickname: $nickname,
-                            twitterHandle: $twitterHandle,
-                            discordHandle: $discordHandle,
-                            telegramHandle: $telegramHandle,
-                            threadsHandle: $threadsHandle,
-                            keywords: $keywords,
-                            pfpImage: inputImage,
-                            onClick: { showingImagePicker = true }
-                        )
-                        .background(Color.red)
-                        .clipShape(CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight]))
-                        .offset(x: 4, y: 4)
-
-                        MakeProfileCardContent(
-                            nickname: $nickname.max(16),
-                            twitterHandle: $twitterHandle,
-                            discordHandle: $discordHandle,
-                            telegramHandle: $telegramHandle,
-                            threadsHandle: $threadsHandle,
-                            keywords: $keywords.max(60),
-                            pfpImage: inputImage,
-                            onClick: { showingImagePicker = true }
-                        )
-                        .background(Color.white)
-                        .clipShape(CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight]))
-                        .offset(x: -4, y: -4)
-                    }
-                    .padding(16)
-                }
-
-                Spacer()
-
-                Button(action: {
-                    viewStore.send(.onMakeMyCardButtonClick)
-                }) {
-                    HStack(alignment: .center, spacing: 10) {
-                        Text(SwirlMakeProfileFeatureStrings.makeProfile)
-                            .font(Font.custom("PP Object Sans", size: 16).weight(.medium))
-                            .foregroundColor(
-                                viewStore.isValid ? Color.white :
-                                    SwirlDesignSystemAsset.Colors.defaultGray.swiftUIColor
+                        .padding(.horizontal, 20)
+                        ZStack {
+                            MakeProfileCardContent(
+                                nickname: $nickname,
+                                twitterHandle: $twitterHandle,
+                                discordHandle: $discordHandle,
+                                telegramHandle: $telegramHandle,
+                                threadsHandle: $threadsHandle,
+                                keywords: $keywords,
+                                pfpImage: inputImage,
+                                onClick: { showingImagePicker = true }
                             )
+                            .background(color)
+                            .clipShape(CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight]))
+                            .offset(x: 4, y: 4)
+
+                            MakeProfileCardContent(
+                                nickname: $nickname.max(16),
+                                twitterHandle: $twitterHandle,
+                                discordHandle: $discordHandle,
+                                telegramHandle: $telegramHandle,
+                                threadsHandle: $threadsHandle,
+                                keywords: $keywords.max(60),
+                                pfpImage: inputImage,
+                                onClick: { showingImagePicker = true }
+                            )
+                            .background(Color.white)
+                            .clipShape(CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight]))
+                            .offset(x: -4, y: -4)
+                        }
+                        .padding(16)
                     }
+
+                    Spacer()
+
+                    Button(action: {
+                        viewStore.send(.onMakeMyCardButtonClick(color))
+                    }) {
+                        HStack(alignment: .center, spacing: 10) {
+                            Text(SwirlMakeProfileFeatureStrings.makeProfile)
+                                .font(Font.custom("PP Object Sans", size: 16).weight(.medium))
+                                .foregroundColor(
+                                    viewStore.isValid ? Color.white :
+                                        SwirlDesignSystemAsset.Colors.defaultGray.swiftUIColor
+                                )
+                        }
+                    }
+                    .disabled(!viewStore.isValid)
+                    .padding(.horizontal, 36)
+                    .padding(.vertical, 12)
+                    .background(!viewStore.isValid ? Color(red: 0.8, green: 0.8, blue: 0.8) : SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                    .cornerRadius(22)
+                    .padding(.bottom, 12)
+                    .animation(.easeIn, value: viewStore.isValid)
                 }
-                .disabled(!viewStore.isValid)
-                .padding(.horizontal, 36)
-                .padding(.vertical, 12)
-                .background(!viewStore.isValid ? Color(red: 0.8, green: 0.8, blue: 0.8) : SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                .cornerRadius(22)
-                .padding(.bottom, 12)
-                .animation(.easeIn, value: viewStore.isValid)
+                .sheet(isPresented: $showingImagePicker) {
+                    ImagePicker(image: $inputImage)
+                }
+                .onChange(of: nickname) { value in
+                    viewStore.send(.updateNickname(value))
+                }
+                .onChange(of: twitterHandle) { value in
+                    viewStore.send(.updateTwitterHandle(value))
+                }
+                .onChange(of: discordHandle) { value in
+                    viewStore.send(.updateDiscordHandle(value))
+                }
+                .onChange(of: telegramHandle) { value in
+                    viewStore.send(.updateTelegramHandle(value))
+                }
+                .onChange(of: threadsHandle) { value in
+                    viewStore.send(.updateThreadsHandle(value))
+                }
+                .onChange(of: keywords) { value in
+                    viewStore.send(.updateKeywords(value))
+                }
+                .onChange(of: inputImage) { value in
+                    viewStore.send(.updatePfpImage(value))
+                }
+
+                if viewStore.isLoading {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                                .controlSize(.large)
+                            Spacer()
+                        }
+                        Spacer()
+                    }
+                    .background(.black.opacity(0.1))
+                    .edgesIgnoringSafeArea(.all)
+                }
             }
-            .sheet(isPresented: $showingImagePicker) {
-                ImagePicker(image: $inputImage)
-            }
-            .onChange(of: nickname) { value in
-                viewStore.send(.updateNickname(value))
-            }
-            .onChange(of: twitterHandle) { value in
-                viewStore.send(.updateTwitterHandle(value))
-            }
-            .onChange(of: discordHandle) { value in
-                viewStore.send(.updateDiscordHandle(value))
-            }
-            .onChange(of: telegramHandle) { value in
-                viewStore.send(.updateTelegramHandle(value))
-            }
-            .onChange(of: threadsHandle) { value in
-                viewStore.send(.updateThreadsHandle(value))
-            }
-            .onChange(of: keywords) { value in
-                viewStore.send(.updateKeywords(value))
-            }
-            .onChange(of: inputImage) { value in
-                viewStore.send(.updatePfpImage(value))
-            }
+            .animation(.easeInOut, value: viewStore.isLoading)
         }
     }
 }

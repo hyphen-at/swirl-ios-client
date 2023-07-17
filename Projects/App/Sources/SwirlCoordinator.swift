@@ -23,6 +23,9 @@ struct SwirlCoordinator: ReducerProtocol {
                 UIView.setAnimationsEnabled(false)
                 state.routes.push(.nameCardList(.init()))
                 return .none
+            case .routeAction(_, action: .makeProfile(.onMakeMyCardComplete)):
+                state.routes.push(.nameCardList(.init()))
+                return .none
             case .routeAction(_, action: .signInConfirmation(.close)):
                 state.routes.dismiss()
 
@@ -34,9 +37,6 @@ struct SwirlCoordinator: ReducerProtocol {
 
                     await dispatch(.updateRoutes(newRoutes))
                 }
-            case .routeAction(_, action: .makeProfile(.onMakeMyCardButtonClick)):
-                state.routes.push(.nameCardList(.init()))
-                return .none
             case let .routeAction(_, action: .nameCardList(.onNameCardClick(profile: profile))):
                 state.routes.presentSheet(.nameCardDetail(.init(profile: profile)))
                 return .none

@@ -5,7 +5,7 @@ import HyphenNetwork
 
 final class HyphenServerKeySigner: FlowSigner {
     var address: Flow.Address {
-        Flow.Address(hex: "0xe496491d14094c7e")
+        SwirlBlockchainManager.shared.flowAccount!.address
     }
 
     private var _keyIndex: Int = 0
@@ -14,6 +14,8 @@ final class HyphenServerKeySigner: FlowSigner {
     }
 
     func sign(transaction _: Flow.Transaction, signableData: Data) async throws -> Data {
+        print("===== [HyphenSigner] HyphenServerKey signing request")
+
         let signResult = try await HyphenNetworking.shared.signTransactionWithServerKey(message: signableData.hexValue)
         return Data(hexString: signResult.signature.signature)!
     }

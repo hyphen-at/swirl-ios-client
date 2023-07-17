@@ -1,9 +1,13 @@
 import ComposableArchitecture
 import Dependencies
+import SwiftUI
+import SwirlBlockchain
 import UIKit
 
 public struct MakeProfile: ReducerProtocol {
     public struct State: Equatable {
+        public var isLoading: Bool = false
+
         public var nickname: String = ""
         public var twitterHandle: String = ""
         public var discordHandle: String = ""
@@ -32,8 +36,12 @@ public struct MakeProfile: ReducerProtocol {
         case updateKeywords(String)
         case updatePfpImage(UIImage?)
 
-        case onMakeMyCardButtonClick
+        case onMakeMyCardButtonClick(Color)
+
+        case onMakeMyCardComplete
     }
+
+    @Dependency(\.swirlBlockchainClient) var blockchainClient
 
     public var body: some ReducerProtocol<State, Action> {
         Reduce { state, action in
@@ -59,6 +67,33 @@ public struct MakeProfile: ReducerProtocol {
             case let .updatePfpImage(pfpImage):
                 state.pfpImage = pfpImage
                 return .none
+            case let .onMakeMyCardButtonClick(color):
+                state.isLoading = true
+                return .run { [state = state] dispatch in
+                    var photoUrlString = ""
+
+                    if let selectedImage = state.pfpImage {
+                        let data = try await UploadPhoto.uploadImage(paramName: "file", fileName: UUID().uuidString, image: selectedImage)
+                        let ipfsHash = data["IpfsHash"] as? String ?? ""
+
+                        photoUrlString = UploadPhoto.getIpfsHashToUrl(ipfsHash).absoluteString
+                    }
+
+                    try await blockchainClient.createMyNameCard(
+                        BlockchainClient.CreateMyNameCardPayload(
+                            nickname: state.nickname,
+                            profileImage: photoUrlString,
+                            keywords: state.keywords.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) },
+                            color: color.toHex()!,
+                            twitterHandle: state.twitterHandle,
+                            telegramHandle: state.telegramHandle,
+                            discordHandle: state.discordHandle,
+                            threadHandle: state.threadsHandle
+                        )
+                    )
+
+                    await dispatch(.onMakeMyCardComplete)
+                }
             default:
                 return .none
             }
