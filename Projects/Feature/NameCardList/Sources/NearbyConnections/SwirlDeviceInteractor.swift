@@ -3,6 +3,7 @@ import MultipeerConnectivity
 import NearbyInteraction
 import SwiftUI
 import SwirlModel
+@_spi(HyphenInternal) import HyphenCore
 
 class SwirlDeviceInteractor: NSObject, ObservableObject, NISessionDelegate {
     var mpc: MPCSession? = nil
@@ -22,8 +23,12 @@ class SwirlDeviceInteractor: NSObject, ObservableObject, NISessionDelegate {
     private var myNameCard: SwirlProfile? = nil
 
     @Published var peerNameCard: SwirlProfile? = nil
+    private var signedPayloadData: Data? = nil
 
-    func startup(myNameCard: SwirlProfile) {
+    func startup(myNameCard: SwirlProfile, signaturePayload: String) {
+        signedPayloadData = HyphenCryptography.signData(signaturePayload.data(using: .utf8)!)
+        print("==== [SignedData] \(signedPayloadData!.hexValue)")
+
         self.myNameCard = myNameCard
 
         // Create the NISession.

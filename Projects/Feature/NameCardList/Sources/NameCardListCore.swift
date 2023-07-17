@@ -9,12 +9,17 @@ public struct NameCardList: ReducerProtocol {
         public var isLoading: Bool = true
         public var profiles: [SwirlProfile] = []
 
+        public var signatureData: String = ""
+
         public init() {}
     }
 
     public enum Action {
         case loading
         case loadingComplete(profiles: [SwirlProfile])
+
+        case createSignaturePayload
+        case createSignaturePayloadDone(String)
 
         case onNameCardClick(profile: SwirlProfile)
     }
@@ -35,6 +40,15 @@ public struct NameCardList: ReducerProtocol {
                 state.isLoading = false
                 state.profiles = profiles
 
+                return .none
+            case .createSignaturePayload:
+                return .run { dispatch in
+                    let signatureData = try await blockchainClient.evalProfOfMeetingSignData(37.5313128, 127.0077684)
+
+                    await dispatch(.createSignaturePayloadDone(signatureData))
+                }
+            case let .createSignaturePayloadDone(signarutePayload):
+                state.signatureData = signarutePayload
                 return .none
             default:
                 return .none

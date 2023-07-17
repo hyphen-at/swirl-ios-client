@@ -10,6 +10,8 @@ public struct BlockchainClient: Sendable {
 
     public var createMyNameCard: @Sendable (CreateMyNameCardPayload) async throws -> Void
 
+    public var evalProfOfMeetingSignData: @Sendable (Float, Float) async throws -> String
+
     public struct CreateMyNameCardPayload {
         public let nickname: String
         public let profileImage: String
@@ -57,6 +59,9 @@ extension BlockchainClient: DependencyKey {
                 discordHandle: payload.discordHandle,
                 threadHandle: payload.threadHandle
             )
+        },
+        evalProfOfMeetingSignData: { lat, lng in
+            try await SwirlBlockchainManager.shared.evalProfOfMeetingSignData(lat: lat, lng: lng)
         }
     )
 }
@@ -68,7 +73,8 @@ extension BlockchainClient: TestDependencyKey {
         fetchFlowAccount: unimplemented("\(Self.self).fetchFlowAccount"),
         getMyNameCard: unimplemented("\(Self.self).getMyNameCard"),
         getNameCardList: unimplemented("\(Self.self).getNameCardList"),
-        createMyNameCard: unimplemented("\(Self.self).createMyNameCard")
+        createMyNameCard: unimplemented("\(Self.self).createMyNameCard"),
+        evalProfOfMeetingSignData: unimplemented("\(Self.self).evalProfOfMeetingSignData")
     )
 }
 

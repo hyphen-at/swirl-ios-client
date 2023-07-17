@@ -154,7 +154,7 @@ public struct NameCardListScreen: View {
                         let generator = UINotificationFeedbackGenerator()
                         generator.notificationOccurred(.success)
 
-                        deviceInteractor.startup(myNameCard: viewStore.profiles.first!)
+                        deviceInteractor.startup(myNameCard: viewStore.profiles.first!, signaturePayload: viewStore.signatureData)
                     }
                     .partialSheet(
                         isPresented: $isMomentConfirmationSheetPresented,
@@ -234,6 +234,7 @@ public struct NameCardListScreen: View {
             .onChange(of: viewStore.isLoading) { value in
                 if !value {
                     UIView.setAnimationsEnabled(true)
+                    viewStore.send(.createSignaturePayload)
                 }
             }
             .onShake {
