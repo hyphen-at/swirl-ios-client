@@ -118,6 +118,11 @@ public struct NameCardListScreen: View {
             .onAppear {
                 viewStore.send(.loading)
             }
+            .onChange(of: viewStore.isLoading) { value in
+                if !value {
+                    UIView.setAnimationsEnabled(true)
+                }
+            }
             .onShake {
                 if isShakeEnabled {
                     return

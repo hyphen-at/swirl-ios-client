@@ -19,6 +19,9 @@ public struct SignIn: ReducerProtocol {
 
         case onContinueWithGoogleButtonClick
 
+        case onNameCardCreateNeed
+        case goToNameCardList
+
         case onError
     }
 
@@ -38,8 +41,16 @@ public struct SignIn: ReducerProtocol {
                     }
                 }
             case .onLoggedIn:
-                return .run { _ in
+                return .run { dispatch in
                     try await blockchainClient.fetchFlowAccount()
+
+                    let myProfile = try await blockchainClient.getMyNameCard()
+
+                    if myProfile == nil {
+                        await dispatch(.onNameCardCreateNeed)
+                    } else {
+                        await dispatch(.goToNameCardList)
+                    }
                 }
             case .onSignInNeed:
                 state.isHyphenAuthenticateChecking = false

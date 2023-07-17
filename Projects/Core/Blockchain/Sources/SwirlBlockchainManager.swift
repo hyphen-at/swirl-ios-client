@@ -1,11 +1,14 @@
 import Flow
 import Foundation
 import HyphenCore
+import SwirlModel
 
 final class SwirlBlockchainManager: NSObject {
     static let shared: SwirlBlockchainManager = .init()
 
     private var flowAccount: Flow.Account? = nil
+
+    private var myNameCard: SwirlProfile? = nil
 
     override private init() {
         flow.configure(chainID: .testnet)
@@ -17,9 +20,49 @@ final class SwirlBlockchainManager: NSObject {
         let account = try await flow.getAccountAtLatestBlock(address: Flow.Address(hex: Hyphen.shared.getWalletAddress()!))
         flowAccount = account
 
-        print(flowAccount!)
+        print("===== [SwirlBlockchainManager] loading account done. Flow account address -> \(flowAccount!.address.hex)")
+    }
 
-        try await createMyNameCard()
+    func getMyNameCard() async throws -> SwirlProfile? {
+        print("===== [SwirlBlockchainManager] get my name card...")
+        if myNameCard != nil {
+            return myNameCard
+        }
+
+        let script = Flow.Script(text: """
+        import SwirlNametag from 0xfe9604dcbf6b270e
+
+        /// Retrieve the SwirlNametag.Profile from the given address.
+        /// If nametag doesn't exist on the address, it returns nil.
+        pub fun main(address: Address): SwirlNametag.Profile? {
+            let account = getAccount(address)
+
+            if let collection = account.getCapability(SwirlNametag.CollectionPublicPath).borrow<&{SwirlNametag.SwirlNametagCollectionPublic}>() {
+                let tokenIDs = collection.getIDs()
+                if tokenIDs.length == 0 {
+                    return nil
+                }
+                let nft = collection.borrowSwirlNametag(id: tokenIDs[0])!
+                let metadata = nft.resolveView(Type<SwirlNametag.Profile>())!
+
+                return metadata as? SwirlNametag.Profile ?? panic("invalid resolveView implementation on SwirlNametag")
+            }
+            // nametag NFT not found
+            return nil
+        }
+
+        """)
+
+        let result = try await flow.executeScriptAtLatestBlock(
+            script: script,
+            arguments: [
+                .address(flowAccount!.address),
+            ]
+        )
+        let decodeResult: SwirlProfile? = try result.decode()
+        myNameCard = decodeResult
+
+        return decodeResult
     }
 
     func createMyNameCard() async throws {

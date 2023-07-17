@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import SwirlSignInFeature
 import TCACoordinators
+import UIKit
 
 struct SwirlCoordinator: ReducerProtocol {
     struct State: Equatable, IndexedRouterState {
@@ -15,9 +16,13 @@ struct SwirlCoordinator: ReducerProtocol {
     var body: some ReducerProtocol<State, Action> {
         Reduce { state, action in
             switch action {
-//            case .routeAction(_, action: .signIn(.onContinueWithGoogleButtonClick)):
-//                state.routes.presentCover(.signInConfirmation(.init()))
-//                return .none
+            case .routeAction(_, action: .signIn(.onNameCardCreateNeed)):
+                state.routes.push(.makeProfile(.init()))
+                return .none
+            case .routeAction(_, action: .signIn(.goToNameCardList)):
+                UIView.setAnimationsEnabled(false)
+                state.routes.push(.nameCardList(.init()))
+                return .none
             case .routeAction(_, action: .signInConfirmation(.close)):
                 state.routes.dismiss()
 
