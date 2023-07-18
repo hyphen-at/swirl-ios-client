@@ -17,6 +17,7 @@ let project = Project.makeModule(
                     .external(name: "ComposableArchitecture"),
                     .external(name: "Dependencies"),
                     .external(name: "NavigationTransitions"),
+                    .external(name: "FCL_SDK"),
                     .shared(implements: .DesignSystem),
                     .core(implements: .Blockchain),
                 ]

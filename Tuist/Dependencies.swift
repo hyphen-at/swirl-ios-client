@@ -11,6 +11,7 @@ let SPM = SwiftPackageManagerDependencies([
     .package(url: "https://github.com/outblock/flow-swift.git", from: "0.3.3"),
     .package(url: "https://github.com/ryanlintott/LookingGlassUI", from: "0.3.1"),
     .package(url: "https://github.com/AndreaMiotto/PartialSheet", from: "3.1.0"),
+    .package(url: "https://github.com/portto/fcl-swift.git", from: "0.4.1"),
     .local(path: .relativeToRoot("hyphen-ios-sdk")),
 ])
 

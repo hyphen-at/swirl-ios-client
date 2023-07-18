@@ -99,8 +99,8 @@ public struct SignInScreen: View {
             }
             .animation(.easeInOut, value: viewStore.isAuthenticating)
         }
-        .introspect(.navigationView(style: .stack), on: .iOS(.v16), scope: .ancestor) { navigationController in
-            navigationController.isNavigationBarHidden = true
+        .introspect(.navigationView(style: .stack), on: .iOS(.v16), scope: .ancestor) { _ in
+            // navigationController.isNavigationBarHidden = true
         }
         .onAppear {
             randomDate = SwirlSignInFeature.randomDate()

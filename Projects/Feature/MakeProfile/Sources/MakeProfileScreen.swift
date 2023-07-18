@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import FCL_SDK
 import SwiftUI
 import SwirlDesignSystem
 
@@ -183,6 +184,7 @@ public struct MakeProfileScreen: View {
                 }
             }
             .navigationBarTitle(Text(viewStore.isEditMode ? "Modify Profile" : ""))
+            .navigationBarHidden(!viewStore.isEditMode)
         }
     }
 }
@@ -308,7 +310,26 @@ struct MakeProfileCardContent: View {
                 .padding(.top, 8)
 
                 if isEditMode {
-                    Button(action: {}) {
+                    Button(action: {
+                        do {
+                            let dapperWalletProvider = DapperWalletProvider.default
+                            try fcl.config
+                                .put(.network(.mainnet))
+                                .put(.supportedWalletProviders(
+                                    [
+                                        dapperWalletProvider,
+                                    ]
+                                ))
+                        } catch {
+                            // handle error
+                        }
+
+                        Task {
+                            do {
+                                try await fcl.login()
+                            } catch {}
+                        }
+                    }) {
                         HStack(spacing: 8) {
                             Spacer()
                             SwirlDesignSystemAsset.Icons.flowLogo.swiftUIImage
