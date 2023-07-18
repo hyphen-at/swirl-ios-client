@@ -39,7 +39,9 @@ public struct NameCardListScreen: View {
                             Spacer()
 
                             if let profile = viewStore.profiles.first {
-                                Button(action: {}) {
+                                Button(action: {
+                                    viewStore.send(.onProfileIconClick)
+                                }) {
                                     ZStack {
                                         Rectangle()
                                             .fill(Color.gray.opacity(0.2))

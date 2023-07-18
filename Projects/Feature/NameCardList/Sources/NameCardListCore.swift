@@ -22,6 +22,8 @@ public struct NameCardList: ReducerProtocol {
         case loading
         case loadingComplete(profiles: [SwirlProfile], moments: [SwirlMoment])
 
+        case onProfileIconClick
+
         case startAutoRefresh
 
         case createSignaturePayload

@@ -11,6 +11,7 @@ public struct BlockchainClient: Sendable {
     public var getMomentList: @Sendable () async throws -> [SwirlMoment]
 
     public var createMyNameCard: @Sendable (CreateMyNameCardPayload) async throws -> Void
+    public var modifyMyNameCard: @Sendable (CreateMyNameCardPayload) async throws -> Void
 
     public var evalProfOfMeetingSignData: @Sendable (Float, Float) async throws -> String
     public var mintMoment: @Sendable ([SwirlMomentSignaturePayload]) async throws -> Void
@@ -48,6 +49,18 @@ extension BlockchainClient: DependencyKey {
                 threadHandle: payload.threadHandle
             )
         },
+        modifyMyNameCard: { payload in
+            try await SwirlBlockchainManager.shared.updateMyNameCard(
+                nickname: payload.nickname,
+                profileImage: payload.profileImage,
+                keywords: payload.keywords,
+                color: payload.color,
+                twitterHandle: payload.twitterHandle,
+                telegramHandle: payload.telegramHandle,
+                discordHandle: payload.discordHandle,
+                threadHandle: payload.threadHandle
+            )
+        },
         evalProfOfMeetingSignData: { lat, lng in
             try await SwirlBlockchainManager.shared.evalProfOfMeetingSignData(lat: lat, lng: lng)
         },
@@ -70,6 +83,7 @@ extension BlockchainClient: TestDependencyKey {
         getNameCardList: unimplemented("\(Self.self).getNameCardList"),
         getMomentList: unimplemented("\(Self.self).getMomentList"),
         createMyNameCard: unimplemented("\(Self.self).createMyNameCard"),
+        modifyMyNameCard: unimplemented("\(Self.self).modifyMyNameCard"),
         evalProfOfMeetingSignData: unimplemented("\(Self.self).evalProfOfMeetingSignData"),
         mintMoment: unimplemented("\(Self.self).mintMoment"),
         burnMoment: unimplemented("\(Self.self).burnMoment")

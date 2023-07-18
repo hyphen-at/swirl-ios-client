@@ -2,10 +2,13 @@ import ComposableArchitecture
 import Dependencies
 import SwiftUI
 import SwirlBlockchain
+import SwirlModel
 import UIKit
 
 public struct MakeProfile: ReducerProtocol {
     public struct State: Equatable {
+        public var isEditMode: Bool = false
+
         public var isLoading: Bool = false
 
         public var nickname: String = ""
@@ -24,10 +27,17 @@ public struct MakeProfile: ReducerProtocol {
             return isNameValid && handleValid && keywordsValid
         }
 
-        public init() {}
+        public var originalProfile: SwirlProfile? = nil
+
+        public init(isEditMode: Bool = false) {
+            self.isEditMode = isEditMode
+        }
     }
 
     public enum Action {
+        case loadOriginalProfile
+        case loadOriginalProfileComplete(SwirlProfile)
+
         case updateNickname(String)
         case updateTwitterHandle(String)
         case updateDiscordHandle(String)
@@ -39,6 +49,7 @@ public struct MakeProfile: ReducerProtocol {
         case onMakeMyCardButtonClick(Color)
 
         case onMakeMyCardComplete
+        case onModifyMyCardComplete
     }
 
     @Dependency(\.swirlBlockchainClient) var blockchainClient
@@ -46,6 +57,15 @@ public struct MakeProfile: ReducerProtocol {
     public var body: some ReducerProtocol<State, Action> {
         Reduce { state, action in
             switch action {
+            case .loadOriginalProfile:
+                return .run { dispatch in
+                    let profile = try await blockchainClient.getMyNameCard()!
+                    await dispatch(.loadOriginalProfileComplete(profile))
+                }
+            case let .loadOriginalProfileComplete(profile):
+                state.originalProfile = profile
+
+                return .none
             case let .updateNickname(nickname):
                 state.nickname = nickname
                 return .none
@@ -70,29 +90,46 @@ public struct MakeProfile: ReducerProtocol {
             case let .onMakeMyCardButtonClick(color):
                 state.isLoading = true
                 return .run { [state = state] dispatch in
-                    var photoUrlString = ""
+                    if !state.isEditMode {
+                        var photoUrlString = ""
 
-                    if let selectedImage = state.pfpImage {
-                        let data = try await UploadPhoto.uploadImage(paramName: "file", fileName: UUID().uuidString, image: selectedImage)
-                        let ipfsHash = data["IpfsHash"] as? String ?? ""
+                        if let selectedImage = state.pfpImage {
+                            let data = try await UploadPhoto.uploadImage(paramName: "file", fileName: UUID().uuidString, image: selectedImage)
+                            let ipfsHash = data["IpfsHash"] as? String ?? ""
 
-                        photoUrlString = UploadPhoto.getIpfsHashToUrl(ipfsHash).absoluteString
-                    }
+                            photoUrlString = UploadPhoto.getIpfsHashToUrl(ipfsHash).absoluteString
+                        }
 
-                    try await blockchainClient.createMyNameCard(
-                        BlockchainClient.CreateMyNameCardPayload(
-                            nickname: state.nickname,
-                            profileImage: photoUrlString,
-                            keywords: state.keywords.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) },
-                            color: color.toHex()!,
-                            twitterHandle: state.twitterHandle,
-                            telegramHandle: state.telegramHandle,
-                            discordHandle: state.discordHandle,
-                            threadHandle: state.threadsHandle
+                        try await blockchainClient.createMyNameCard(
+                            BlockchainClient.CreateMyNameCardPayload(
+                                nickname: state.nickname,
+                                profileImage: photoUrlString,
+                                keywords: state.keywords.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) },
+                                color: color.toHex()!,
+                                twitterHandle: state.twitterHandle,
+                                telegramHandle: state.telegramHandle,
+                                discordHandle: state.discordHandle,
+                                threadHandle: state.threadsHandle
+                            )
                         )
-                    )
 
-                    await dispatch(.onMakeMyCardComplete)
+                        await dispatch(.onMakeMyCardComplete)
+                    } else {
+                        try await blockchainClient.modifyMyNameCard(
+                            BlockchainClient.CreateMyNameCardPayload(
+                                nickname: state.nickname,
+                                profileImage: state.originalProfile!.profileImage,
+                                keywords: state.keywords.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) },
+                                color: color.toHex()!,
+                                twitterHandle: state.twitterHandle,
+                                telegramHandle: state.telegramHandle,
+                                discordHandle: state.discordHandle,
+                                threadHandle: state.threadsHandle
+                            )
+                        )
+
+                        await dispatch(.onModifyMyCardComplete)
+                    }
                 }
             default:
                 return .none

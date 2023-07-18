@@ -40,7 +40,8 @@ public class SwirlCardStackViewController: TGLStackedViewController {
     public var onNameCardClick: (SwirlProfile, Int) -> Void = { _, _ in }
 
     public func updateProfileList(_ profiles: [SwirlProfile]) {
-        if profiles.count != self.profiles.count {
+        if profiles != self.profiles {
+//        if profiles.count != self.profiles.count {
             self.profiles = profiles
             collectionView.reloadData()
         }

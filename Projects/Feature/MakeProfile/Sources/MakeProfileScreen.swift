@@ -1,6 +1,5 @@
 import ComposableArchitecture
 import SwiftUI
-import SwiftUIIntrospect
 import SwirlDesignSystem
 
 public struct MakeProfileScreen: View {
@@ -29,23 +28,26 @@ public struct MakeProfileScreen: View {
             ZStack {
                 VStack {
                     ScrollView {
-                        VStack(spacing: 0) {
-                            HStack {
-                                Text(SwirlMakeProfileFeatureStrings.letsMake)
-                                    .font(Font.custom("PP Object Sans", size: 32).weight(.medium))
-                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                                Spacer()
+                        if !viewStore.isEditMode {
+                            VStack(spacing: 0) {
+                                HStack {
+                                    Text(SwirlMakeProfileFeatureStrings.letsMake)
+                                        .font(Font.custom("PP Object Sans", size: 32).weight(.medium))
+                                        .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                                    Spacer()
+                                }
+                                .padding(.top, 8)
+                                HStack {
+                                    Text(SwirlMakeProfileFeatureStrings.letsMakeDescription)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                                    Spacer()
+                                }
+                                .padding(.top, 8)
                             }
-                            .padding(.top, 8)
-                            HStack {
-                                Text(SwirlMakeProfileFeatureStrings.letsMakeDescription)
-                                    .font(.system(size: 14))
-                                    .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
-                                Spacer()
-                            }
-                            .padding(.top, 8)
+                            .padding(.horizontal, 20)
                         }
-                        .padding(.horizontal, 20)
+
                         ZStack {
                             MakeProfileCardContent(
                                 nickname: $nickname,
@@ -54,6 +56,7 @@ public struct MakeProfileScreen: View {
                                 telegramHandle: $telegramHandle,
                                 threadsHandle: $threadsHandle,
                                 keywords: $keywords,
+                                isEditMode: viewStore.isEditMode,
                                 pfpImage: inputImage,
                                 onClick: { showingImagePicker = true }
                             )
@@ -68,6 +71,7 @@ public struct MakeProfileScreen: View {
                                 telegramHandle: $telegramHandle,
                                 threadsHandle: $threadsHandle,
                                 keywords: $keywords.max(60),
+                                isEditMode: viewStore.isEditMode,
                                 pfpImage: inputImage,
                                 onClick: { showingImagePicker = true }
                             )
@@ -81,10 +85,11 @@ public struct MakeProfileScreen: View {
                     Spacer()
 
                     Button(action: {
+                        UIApplication.shared.endEditing()
                         viewStore.send(.onMakeMyCardButtonClick(color))
                     }) {
                         HStack(alignment: .center, spacing: 10) {
-                            Text(SwirlMakeProfileFeatureStrings.makeProfile)
+                            Text(viewStore.isEditMode ? SwirlMakeProfileFeatureStrings.adjust : SwirlMakeProfileFeatureStrings.makeProfile)
                                 .font(Font.custom("PP Object Sans", size: 16).weight(.medium))
                                 .foregroundColor(
                                     viewStore.isValid ? Color.white :
@@ -140,7 +145,44 @@ public struct MakeProfileScreen: View {
                     .edgesIgnoringSafeArea(.all)
                 }
             }
+            .onAppear {
+                if viewStore.isEditMode {
+                    viewStore.send(.loadOriginalProfile)
+                }
+            }
             .animation(.easeInOut, value: viewStore.isLoading)
+            .onChange(of: viewStore.originalProfile) { value in
+                if let originalProfile = value {
+                    nickname = originalProfile.nickname
+                    twitterHandle = originalProfile.socialHandles.first { $0.channel == "twitter" }?.handle ?? ""
+                    discordHandle = originalProfile.socialHandles.first { $0.channel == "discord" }?.handle ?? ""
+                    threadsHandle = originalProfile.socialHandles.first { $0.channel == "thread" }?.handle ?? ""
+                    telegramHandle = originalProfile.socialHandles.first { $0.channel == "telegram" }?.handle ?? ""
+
+                    keywords = originalProfile.keywords.joined(separator: ", ")
+                    color = Color(hex: originalProfile.color)!
+
+                    guard let url = URL(string: originalProfile.profileImage) else {
+                        print("Invalid URL")
+                        return
+                    }
+
+                    let task = URLSession.shared.dataTask(with: url) { data, _, error in
+                        if let error = error {
+                            print("Error: \(error)")
+                        } else if let data = data {
+                            DispatchQueue.main.async {
+                                if let image = UIImage(data: data) {
+                                    inputImage = image
+                                }
+                            }
+                        }
+                    }
+
+                    task.resume()
+                }
+            }
+            .navigationBarTitle(Text(viewStore.isEditMode ? "Modify Profile" : ""))
         }
     }
 }
@@ -152,6 +194,8 @@ struct MakeProfileCardContent: View {
     @Binding var telegramHandle: String
     @Binding var threadsHandle: String
     @Binding var keywords: String
+
+    var isEditMode: Bool
 
     let pfpImage: UIImage?
 
@@ -256,9 +300,37 @@ struct MakeProfileCardContent: View {
                 SwirlButton(
                     label: pfpImage == nil ? SwirlMakeProfileFeatureStrings.makeProfilePfpCta : SwirlDesignSystemStrings.edit,
                     fontSize: 12,
-                    onClick: onClick
+                    onClick: {
+                        UIApplication.shared.endEditing()
+                        onClick()
+                    }
                 )
                 .padding(.top, 8)
+
+                if isEditMode {
+                    Button(action: {}) {
+                        HStack(spacing: 8) {
+                            Spacer()
+                            SwirlDesignSystemAsset.Icons.flowLogo.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
+
+                            Text("Connect Your Own Wallet")
+                                .font(.system(size: 16))
+                                .foregroundColor(SwirlDesignSystemAsset.Colors.defaultBlack.swiftUIColor)
+                            Spacer()
+                        }
+                        .padding(.vertical, 12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(red: 0.09, green: 0.09, blue: 0.09), lineWidth: 1)
+                        )
+                        .background(Color(hex: "#31FD9C")!)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .padding(.top, 20)
+                }
             }
         }
         .padding(16)
@@ -267,5 +339,11 @@ struct MakeProfileCardContent: View {
             CustomRoundedCorner(radius: 24, corners: [.topRight, .bottomLeft, .bottomRight])
                 .stroke(.black, lineWidth: 2)
         )
+    }
+}
+
+extension UIApplication {
+    func endEditing() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }

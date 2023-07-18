@@ -407,6 +407,7 @@ final class SwirlBlockchainManager: NSObject {
         let txWait = try await flow.sendTransaction(transaction: signedTx)
         print(txWait)
         let txResult = try await txWait.onceSealed()
+        myNameCard = nil
     }
 
     func evalProfOfMeetingSignData(lat: Float, lng: Float) async throws -> String {

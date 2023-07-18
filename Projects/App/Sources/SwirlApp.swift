@@ -45,5 +45,6 @@ struct SwirlApp: View {
             }
         }
         .attachPartialSheetToRoot()
+        .tint(.black)
     }
 }

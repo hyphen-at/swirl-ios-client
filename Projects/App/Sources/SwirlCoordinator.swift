@@ -26,6 +26,9 @@ struct SwirlCoordinator: ReducerProtocol {
             case .routeAction(_, action: .makeProfile(.onMakeMyCardComplete)):
                 state.routes.push(.nameCardList(.init()))
                 return .none
+            case .routeAction(_, action: .makeProfile(.onModifyMyCardComplete)):
+                state.routes.pop()
+                return .none
             case .routeAction(_, action: .signInConfirmation(.close)):
                 state.routes.dismiss()
 
@@ -39,6 +42,9 @@ struct SwirlCoordinator: ReducerProtocol {
                 }
             case let .routeAction(_, action: .nameCardList(.onNameCardClick(profile: profile, momentId: momentId))):
                 state.routes.presentSheet(.nameCardDetail(.init(profile: profile, momentId: momentId)))
+                return .none
+            case .routeAction(_, action: .nameCardList(.onProfileIconClick)):
+                state.routes.push(.makeProfile(.init(isEditMode: true)))
                 return .none
             default:
                 return .none
