@@ -80,3 +80,6 @@ GoogleService-Info.plist
 ### Purchased Font
 PPObjectSans-Bold.otf
 PPObjectSans-Medium.otf
+
+### Visual Studio Code
+.vscode
