@@ -1,0 +1,3 @@
+[submodule "hyphen-ios-sdk"]
+	path = hyphen-ios-sdk
+	url = git@github.com:hyphen-at/hyphen-ios-sdk.git
