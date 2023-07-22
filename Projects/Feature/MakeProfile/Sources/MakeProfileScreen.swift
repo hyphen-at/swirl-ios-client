@@ -1,5 +1,5 @@
 import ComposableArchitecture
-import FCL_SDK
+// import FCL_SDK
 import SwiftUI
 import SwirlDesignSystem
 
@@ -311,24 +311,24 @@ struct MakeProfileCardContent: View {
 
                 if isEditMode {
                     Button(action: {
-                        do {
-                            let dapperWalletProvider = DapperWalletProvider.default
-                            try fcl.config
-                                .put(.network(.mainnet))
-                                .put(.supportedWalletProviders(
-                                    [
-                                        dapperWalletProvider,
-                                    ]
-                                ))
-                        } catch {
-                            // handle error
-                        }
+                        // do {
+                        //     let dapperWalletProvider = DapperWalletProvider.default
+                        //     try fcl.config
+                        //         .put(.network(.mainnet))
+                        //         .put(.supportedWalletProviders(
+                        //             [
+                        //                 dapperWalletProvider,
+                        //             ]
+                        //         ))
+                        // } catch {
+                        //     // handle error
+                        // }
 
-                        Task {
-                            do {
-                                try await fcl.login()
-                            } catch {}
-                        }
+                        // Task {
+                        //     do {
+                        //         try await fcl.login()
+                        //     } catch {}
+                        // }
                     }) {
                         HStack(spacing: 8) {
                             Spacer()

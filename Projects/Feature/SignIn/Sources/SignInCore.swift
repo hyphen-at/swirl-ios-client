@@ -33,7 +33,7 @@ public struct SignIn: ReducerProtocol {
             switch action {
             case .onHyphenAuthenticateChecking:
                 return .run { dispatch in
-                    if authClient.isHyphenLoggedIn() {
+                    if try await authClient.isHyphenLoggedIn() {
                         try await Task.sleep(nanoseconds: 1_000_000_000)
                         await dispatch(.onLoggedIn)
                     } else {

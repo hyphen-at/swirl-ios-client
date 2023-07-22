@@ -1,6 +1,6 @@
 import Flow
 import Foundation
-import HyphenCore
+import HyphenAuthenticate
 import SwirlModel
 
 final class SwirlBlockchainManager: NSObject {
@@ -17,7 +17,9 @@ final class SwirlBlockchainManager: NSObject {
     func loadAccount() async throws {
         print("===== [SwirlBlockchainManager] loading account...")
 
-        let account = try await flow.getAccountAtLatestBlock(address: Flow.Address(hex: Hyphen.shared.getWalletAddress()!))
+        let hyphenAccount = try await HyphenAuthenticate.shared.getAccount()
+
+        let account = try await flow.getAccountAtLatestBlock(address: Flow.Address(hex: hyphenAccount.addresses.first!.address))
         flowAccount = account
 
         print("===== [SwirlBlockchainManager] loading account done. Flow account address -> \(flowAccount!.address.hex)")

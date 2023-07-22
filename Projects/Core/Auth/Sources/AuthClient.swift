@@ -5,7 +5,7 @@ import HyphenCore
 import XCTestDynamicOverlay
 
 public struct AuthClient: Sendable {
-    public var isHyphenLoggedIn: @Sendable () -> Bool
+    public var isHyphenLoggedIn: @Sendable () async throws -> Bool
     public var signInWithGoogle: @Sendable () async throws -> Void
 }
 
@@ -14,7 +14,12 @@ public struct AuthClient: Sendable {
 extension AuthClient: DependencyKey {
     public static var liveValue = Self(
         isHyphenLoggedIn: {
-            Hyphen.shared.isCredentialExist()
+            do {
+                _ = try await HyphenAuthenticate.shared.getAccount()
+                return true
+            } catch {
+                return false
+            }
         },
         signInWithGoogle: {
             try await HyphenAuthenticate.shared.authenticate(provider: .google)

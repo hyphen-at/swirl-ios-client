@@ -4,7 +4,7 @@ import Foundation
 
 final class HyphenDeviceKeySigner: FlowSigner {
     var address: Flow.Address {
-        Flow.Address(hex: Hyphen.shared.getWalletAddress()!)
+        Flow.Address(hex: SwirlBlockchainManager.shared.getCachedAccountAddress())
     }
 
     var keyIndex: Int {
