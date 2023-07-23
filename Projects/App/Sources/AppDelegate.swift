@@ -21,8 +21,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 store: Store(
                     initialState: SwirlCoordinator.State(),
                     reducer: SwirlCoordinator()
-                        .signpost()
-                        ._printChanges()
+//                        .signpost()
+//                        ._printChanges()
                 )
             )
         )
@@ -62,10 +62,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Hyphen.shared.apnsToken = deviceToken
     }
-    
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) async -> UIBackgroundFetchResult {
-        print(userInfo)
-        
+
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) async -> UIBackgroundFetchResult {
+        await Hyphen.shared.application(application, didReceiveRemoteNotification: userInfo)
+
         return .newData
     }
 
@@ -73,7 +73,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let userInfo = notification.request.content.userInfo
         print(userInfo)
 
-        return [[.sound, .badge, .list]]
+        return [[.alert, .sound, .badge, .list]]
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
