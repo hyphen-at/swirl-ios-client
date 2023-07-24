@@ -12,6 +12,7 @@ let SPM = SwiftPackageManagerDependencies([
     .package(url: "https://github.com/AndreaMiotto/PartialSheet", from: "3.1.0"),
     // .package(url: "https://github.com/portto/fcl-swift.git", from: "0.4.1"),
     .package(url: "https://github.com/hyphen-at/hyphen-ios-sdk.git", .branch("main")),
+    .package(url: "https://github.com/dsa28s/nearby-connections-dynamic-xcframework.git", .branch("main")),
 ])
 
 let dependencies = Dependencies(

@@ -1,6 +1,0 @@
-framework module NearbyCoreAdapter {
-  umbrella header "NearbyCoreAdapter.h"
-
-  export *
-  module * { export * }
-}
