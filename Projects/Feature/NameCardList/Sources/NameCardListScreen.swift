@@ -1,4 +1,6 @@
 import ComposableArchitecture
+import HyphenCore
+import HyphenUI
 import LookingGlassUI
 import MultipeerConnectivity
 import NearbyInteraction
@@ -40,7 +42,8 @@ public struct NameCardListScreen: View {
 
                             if let profile = viewStore.profiles.first {
                                 Button(action: {
-                                    viewStore.send(.onProfileIconClick)
+                                    Hyphen.shared.openKeyManager()
+                                    // viewStore.send(.onProfileIconClick)
                                 }) {
                                     ZStack {
                                         Rectangle()

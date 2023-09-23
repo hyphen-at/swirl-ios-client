@@ -26,8 +26,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 )
             )
         )
-        window?.rootViewController = viewController
+        let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.navigationBar.isHidden = true
+        //avigationController.navigationItem.backButtonTitle = "Back"
+        // navigationController.navigationBar.tintColor = .black
+        // navigationController.title = "Key Manager"
+        window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
+
+        // HyphenCryptography.deleteKey()
 
         Hyphen.shared.appSecret = "iuw1jf5k6j2y0y5iz36xakbii4dkkktledplmuj83380"
         HyphenAuthenticateAppDelegate.shared.application(application)
