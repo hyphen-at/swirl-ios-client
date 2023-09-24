@@ -28,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         )
         let navigationController = UINavigationController(rootViewController: viewController)
         navigationController.navigationBar.isHidden = true
-        //avigationController.navigationItem.backButtonTitle = "Back"
+        // avigationController.navigationItem.backButtonTitle = "Back"
         // navigationController.navigationBar.tintColor = .black
         // navigationController.title = "Key Manager"
         window?.rootViewController = navigationController
@@ -36,12 +36,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         // HyphenCryptography.deleteKey()
 
+        Hyphen.shared.network = .mainnet
         Hyphen.shared.appSecret = "iuw1jf5k6j2y0y5iz36xakbii4dkkktledplmuj83380"
         HyphenAuthenticateAppDelegate.shared.application(application)
         HyphenUI.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
 
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if let error = error {
+            if let error {
                 print(error)
             } else {
                 DispatchQueue.main.async {

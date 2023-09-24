@@ -60,7 +60,7 @@ public struct NameCardList: ReducerProtocol {
                     let moments = try await blockchainClient.getMomentList()
                     let myProfile = try await blockchainClient.getMyNameCard()!
 
-                    await dispatch(.loadingComplete(profiles: [myProfile] + moments.map { $0.profile }, moments: moments))
+                    await dispatch(.loadingComplete(profiles: [myProfile] + moments.map(\.profile), moments: moments))
                 }
             case let .loadingComplete(profiles, moments):
                 state.isLoading = false

@@ -1,6 +1,8 @@
 import Flow
 import Foundation
 import HyphenAuthenticate
+import HyphenCore
+import HyphenFlow
 import SwirlModel
 
 final class SwirlBlockchainManager: NSObject {
@@ -10,8 +12,28 @@ final class SwirlBlockchainManager: NSObject {
 
     private var myNameCard: SwirlProfile? = nil
 
+    var swirlContractAddress: String {
+        if Hyphen.shared.network == .testnet {
+            "0x5969d51aa05825c4"
+        } else {
+            "0xed00d8ac249ee4b6"
+        }
+    }
+
+    var nonFungibleTokenAddress: String {
+        if Hyphen.shared.network == .testnet {
+            "0x631e88ae7f1d7c20"
+        } else {
+            "0x1d7e57aa55817448"
+        }
+    }
+
     override private init() {
-        flow.configure(chainID: .testnet)
+        if Hyphen.shared.network == .testnet {
+            flow.configure(chainID: .testnet)
+        } else {
+            flow.configure(chainID: .mainnet)
+        }
     }
 
     func loadAccount() async throws {
@@ -26,7 +48,7 @@ final class SwirlBlockchainManager: NSObject {
     }
 
     func getCachedAccountAddress() -> String {
-        return flowAccount!.address.hex
+        flowAccount!.address.hex
     }
 
     func getMyNameCard() async throws -> SwirlProfile? {
@@ -36,7 +58,7 @@ final class SwirlBlockchainManager: NSObject {
         }
 
         let script = Flow.Script(text: """
-        import SwirlNametag from 0x5969d51aa05825c4
+        import SwirlNametag from \(swirlContractAddress)
 
         /// Retrieve the SwirlNametag.Profile from the given address.
         /// If nametag doesn't exist on the address, it returns nil.
@@ -73,8 +95,8 @@ final class SwirlBlockchainManager: NSObject {
 
     func getNameCardList() async throws -> [SwirlProfile] {
         let script = Flow.Script(text: """
-        import SwirlNametag from 0x5969d51aa05825c4
-        import SwirlMoment from 0x5969d51aa05825c4
+        import SwirlNametag from \(swirlContractAddress)
+        import SwirlMoment from \(swirlContractAddress)
 
         /// Retrieve the SwirlNametag.Profile from the given address.
         /// If nametag doesn't exist on the address, it returns nil.
@@ -108,8 +130,8 @@ final class SwirlBlockchainManager: NSObject {
 
     func getMomentList() async throws -> [SwirlMoment] {
         let script = Flow.Script(text: """
-        import SwirlNametag from 0x5969d51aa05825c4
-        import SwirlMoment from 0x5969d51aa05825c4
+        import SwirlNametag from \(swirlContractAddress)
+        import SwirlMoment from \(swirlContractAddress)
 
         pub struct MomentInfo {
             pub let id: UInt64
@@ -163,128 +185,107 @@ final class SwirlBlockchainManager: NSObject {
         discordHandle: String?,
         threadHandle: String?
     ) async throws {
-        let deviceKeySigner = HyphenDeviceKeySigner()
-        let serverKeySigner = HyphenServerKeySigner()
-        let payMasterKeySigner = HyphenPayMasterKeySigner()
+        let cadence = HyphenFlowCadence(
+            cadence: """
+            import NonFungibleToken from \(nonFungibleTokenAddress)
+            import MetadataViews from \(nonFungibleTokenAddress)
+            import SwirlMoment from \(swirlContractAddress)
+            import SwirlNametag from \(swirlContractAddress)
 
-        let signers: [FlowSigner] = [serverKeySigner, deviceKeySigner, payMasterKeySigner]
+            /// Sets up collections of SwirlMoment, SwirlNametag for an account so it can receive these NFTs,
+            /// and mints a SwirlNametag which acts as the account's profile.
+            ///
+            transaction(
+                nickname: String,
+                profileImage: String,
+                keywords: [String],
+                color: String,
+                twitterHandle: String?,
+                telegramHandle: String?,
+                discordHandle: String?,
+                threadHandle: String?
+            ) {
+                let collectionRef: &{NonFungibleToken.CollectionPublic}
+                let profile: SwirlNametag.Profile
 
-        var unsignedTx = try! await flow.buildTransaction {
-            cadence {
-                """
-                import NonFungibleToken from 0x631e88ae7f1d7c20
-                import MetadataViews from 0x631e88ae7f1d7c20
-                import SwirlMoment from 0x5969d51aa05825c4
-                import SwirlNametag from 0x5969d51aa05825c4
-
-                /// Sets up collections of SwirlMoment, SwirlNametag for an account so it can receive these NFTs,
-                /// and mints a SwirlNametag which acts as the account's profile.
-                ///
-                transaction(
-                    nickname: String,
-                    profileImage: String,
-                    keywords: [String],
-                    color: String,
-                    twitterHandle: String?,
-                    telegramHandle: String?,
-                    discordHandle: String?,
-                    threadHandle: String?
-                ) {
-                    let collectionRef: &{NonFungibleToken.CollectionPublic}
-                    let profile: SwirlNametag.Profile
-
-                    prepare(signer: AuthAccount) {
-                        if signer.borrow<&SwirlMoment.Collection>(from: SwirlMoment.CollectionStoragePath) == nil {
-                            // set up SwirlMoment.Collection to the account.
-                            signer.save(<-SwirlMoment.createEmptyCollection(), to: SwirlMoment.CollectionStoragePath)
-                            signer.link<&{NonFungibleToken.CollectionPublic, SwirlMoment.SwirlMomentCollectionPublic, MetadataViews.ResolverCollection}>(
-                                SwirlMoment.CollectionPublicPath,
-                                target: SwirlMoment.CollectionStoragePath
-                            )
-                        }
-
-                        if signer.borrow<&SwirlNametag.Collection>(from: SwirlNametag.CollectionStoragePath) == nil {
-                            // set up SwirlNametag.Collection to the account.
-                            signer.save(<-SwirlNametag.createEmptyCollection(), to: SwirlNametag.CollectionStoragePath)
-                            signer.link<&{NonFungibleToken.CollectionPublic, SwirlNametag.SwirlNametagCollectionPublic, MetadataViews.ResolverCollection}>(
-                                SwirlNametag.CollectionPublicPath,
-                                target: SwirlNametag.CollectionStoragePath
-                            )
-                        }
-
-                        self.collectionRef = signer.borrow<&{NonFungibleToken.CollectionPublic}>(from: SwirlNametag.CollectionStoragePath)
-                            ?? panic("Could not borrow a reference to the SwirlNametag collection")
-
-                        let socialHandles: [SwirlNametag.SocialHandle] = []
-                        if twitterHandle != nil {
-                            socialHandles.append(SwirlNametag.SocialHandle(
-                                type: "twitter",
-                                value: twitterHandle!
-                            ))
-                        }
-                        if telegramHandle != nil {
-                            socialHandles.append(SwirlNametag.SocialHandle(
-                                type: "telegram",
-                                value: telegramHandle!
-                            ))
-                        }
-                        if discordHandle != nil {
-                            socialHandles.append(SwirlNametag.SocialHandle(
-                                type: "discord",
-                                value: discordHandle!
-                            ))
-                        }
-                        if threadHandle != nil {
-                            socialHandles.append(SwirlNametag.SocialHandle(
-                                type: "thread",
-                                value: threadHandle!
-                            ))
-                        }
-
-                        self.profile = SwirlNametag.Profile(
-                            nickname: nickname,
-                            profileImage: profileImage,
-                            keywords: keywords,
-                            color: color,
-                            socialHandles: socialHandles
+                prepare(signer: AuthAccount) {
+                    if signer.borrow<&SwirlMoment.Collection>(from: SwirlMoment.CollectionStoragePath) == nil {
+                        // set up SwirlMoment.Collection to the account.
+                        signer.save(<-SwirlMoment.createEmptyCollection(), to: SwirlMoment.CollectionStoragePath)
+                        signer.link<&{NonFungibleToken.CollectionPublic, SwirlMoment.SwirlMomentCollectionPublic, MetadataViews.ResolverCollection}>(
+                            SwirlMoment.CollectionPublicPath,
+                            target: SwirlMoment.CollectionStoragePath
                         )
                     }
 
-                    execute {
-                        SwirlNametag.mintNFT(recipient: self.collectionRef, profile: self.profile)
+                    if signer.borrow<&SwirlNametag.Collection>(from: SwirlNametag.CollectionStoragePath) == nil {
+                        // set up SwirlNametag.Collection to the account.
+                        signer.save(<-SwirlNametag.createEmptyCollection(), to: SwirlNametag.CollectionStoragePath)
+                        signer.link<&{NonFungibleToken.CollectionPublic, SwirlNametag.SwirlNametagCollectionPublic, MetadataViews.ResolverCollection}>(
+                            SwirlNametag.CollectionPublicPath,
+                            target: SwirlNametag.CollectionStoragePath
+                        )
                     }
+
+                    self.collectionRef = signer.borrow<&{NonFungibleToken.CollectionPublic}>(from: SwirlNametag.CollectionStoragePath)
+                        ?? panic("Could not borrow a reference to the SwirlNametag collection")
+
+                    let socialHandles: [SwirlNametag.SocialHandle] = []
+                    if twitterHandle != nil {
+                        socialHandles.append(SwirlNametag.SocialHandle(
+                            type: "twitter",
+                            value: twitterHandle!
+                        ))
+                    }
+                    if telegramHandle != nil {
+                        socialHandles.append(SwirlNametag.SocialHandle(
+                            type: "telegram",
+                            value: telegramHandle!
+                        ))
+                    }
+                    if discordHandle != nil {
+                        socialHandles.append(SwirlNametag.SocialHandle(
+                            type: "discord",
+                            value: discordHandle!
+                        ))
+                    }
+                    if threadHandle != nil {
+                        socialHandles.append(SwirlNametag.SocialHandle(
+                            type: "thread",
+                            value: threadHandle!
+                        ))
+                    }
+
+                    self.profile = SwirlNametag.Profile(
+                        nickname: nickname,
+                        profileImage: profileImage,
+                        keywords: keywords,
+                        color: color,
+                        socialHandles: socialHandles
+                    )
                 }
 
-                """
+                execute {
+                    SwirlNametag.mintNFT(recipient: self.collectionRef, profile: self.profile)
+                }
             }
 
-            proposer {
-                Flow.TransactionProposalKey(address: deviceKeySigner.address, keyIndex: 1)
-            }
+            """
+        )
 
-            arguments {
-                [
-                    .string(nickname),
-                    .string(profileImage),
-                    .array(keywords.map { .string($0) }),
-                    .string("#\(color)"),
-                    .optional(.string(twitterHandle ?? "")),
-                    .optional(.string(telegramHandle ?? "")),
-                    .optional(.string(discordHandle ?? "")),
-                    .optional(.string(threadHandle ?? "")),
-                ]
-            }
-
-            payer {
-                payMasterKeySigner.address
-            }
-
-            authorizers {
-                deviceKeySigner.address
-            }
-        }
-
-        let signedTx = try await unsignedTx.sign(signers: signers)
+        let signedTx = try await HyphenFlow.shared.makeSignedTransactionPayloadWithArguments(
+            hyphenFlowCadence: cadence,
+            args: [
+                .string(nickname),
+                .string(profileImage),
+                .array(keywords.map { .string($0) }),
+                .string("#\(color)"),
+                .optional(.string(twitterHandle ?? "")),
+                .optional(.string(telegramHandle ?? "")),
+                .optional(.string(discordHandle ?? "")),
+                .optional(.string(threadHandle ?? "")),
+            ]
+        )
         let txWait = try await flow.sendTransaction(transaction: signedTx)
         let txResult = try await txWait.onceSealed()
 
@@ -304,108 +305,87 @@ final class SwirlBlockchainManager: NSObject {
         discordHandle: String?,
         threadHandle: String?
     ) async throws {
-        let deviceKeySigner = HyphenDeviceKeySigner()
-        let serverKeySigner = HyphenServerKeySigner()
-        let payMasterKeySigner = HyphenPayMasterKeySigner()
+        let cadence = HyphenFlowCadence(
+            cadence: """
+            import SwirlNametag from \(swirlContractAddress)
 
-        let signers: [FlowSigner] = [serverKeySigner, deviceKeySigner, payMasterKeySigner]
+            /// Updates existing nametag.
+            transaction(
+                nickname: String,
+                profileImage: String,
+                keywords: [String],
+                color: String,
+                twitterHandle: String?,
+                telegramHandle: String?,
+                discordHandle: String?,
+                threadHandle: String?
+            ) {
+                let collection: &SwirlNametag.Collection
+                let newProfile: SwirlNametag.Profile
 
-        var unsignedTx = try! await flow.buildTransaction {
-            cadence {
-                """
-                import SwirlNametag from 0x5969d51aa05825c4
+                prepare(signer: AuthAccount) {
+                    self.collection = signer.borrow<&SwirlNametag.Collection>(from: SwirlNametag.CollectionStoragePath)
+                        ?? panic("Could not borrow a reference to the SwirlNametag collection")
 
-                /// Updates existing nametag.
-                transaction(
-                    nickname: String,
-                    profileImage: String,
-                    keywords: [String],
-                    color: String,
-                    twitterHandle: String?,
-                    telegramHandle: String?,
-                    discordHandle: String?,
-                    threadHandle: String?
-                ) {
-                    let collection: &SwirlNametag.Collection
-                    let newProfile: SwirlNametag.Profile
-
-                    prepare(signer: AuthAccount) {
-                        self.collection = signer.borrow<&SwirlNametag.Collection>(from: SwirlNametag.CollectionStoragePath)
-                            ?? panic("Could not borrow a reference to the SwirlNametag collection")
-
-                        if self.collection.getIDs().length == 0 {
-                            panic("No nametags exist in the collection")
-                        }
-
-                        let socialHandles: [SwirlNametag.SocialHandle] = []
-                        if twitterHandle != nil {
-                            socialHandles.append(SwirlNametag.SocialHandle(
-                                type: "twitter",
-                                value: twitterHandle!
-                            ))
-                        }
-                        if telegramHandle != nil {
-                            socialHandles.append(SwirlNametag.SocialHandle(
-                                type: "telegram",
-                                value: telegramHandle!
-                            ))
-                        }
-                        if discordHandle != nil {
-                            socialHandles.append(SwirlNametag.SocialHandle(
-                                type: "discord",
-                                value: discordHandle!
-                            ))
-                        }
-                        if threadHandle != nil {
-                            socialHandles.append(SwirlNametag.SocialHandle(
-                                type: "thread",
-                                value: threadHandle!
-                            ))
-                        }
-
-                        self.newProfile = SwirlNametag.Profile(
-                            nickname: nickname,
-                            profileImage: profileImage,
-                            keywords: keywords,
-                            color: color,
-                            socialHandles: socialHandles
-                        )
+                    if self.collection.getIDs().length == 0 {
+                        panic("No nametags exist in the collection")
                     }
 
-                    execute {
-                        self.collection.updateSwirlNametag(profile: self.newProfile)
+                    let socialHandles: [SwirlNametag.SocialHandle] = []
+                    if twitterHandle != nil {
+                        socialHandles.append(SwirlNametag.SocialHandle(
+                            type: "twitter",
+                            value: twitterHandle!
+                        ))
                     }
+                    if telegramHandle != nil {
+                        socialHandles.append(SwirlNametag.SocialHandle(
+                            type: "telegram",
+                            value: telegramHandle!
+                        ))
+                    }
+                    if discordHandle != nil {
+                        socialHandles.append(SwirlNametag.SocialHandle(
+                            type: "discord",
+                            value: discordHandle!
+                        ))
+                    }
+                    if threadHandle != nil {
+                        socialHandles.append(SwirlNametag.SocialHandle(
+                            type: "thread",
+                            value: threadHandle!
+                        ))
+                    }
+
+                    self.newProfile = SwirlNametag.Profile(
+                        nickname: nickname,
+                        profileImage: profileImage,
+                        keywords: keywords,
+                        color: color,
+                        socialHandles: socialHandles
+                    )
                 }
-                """
-            }
 
-            proposer {
-                Flow.TransactionProposalKey(address: deviceKeySigner.address, keyIndex: 1)
+                execute {
+                    self.collection.updateSwirlNametag(profile: self.newProfile)
+                }
             }
+            """
+        )
 
-            arguments {
-                [
-                    .string(nickname),
-                    .string(profileImage),
-                    .array(keywords.map { .string($0) }),
-                    .string(color),
-                    .optional(.string(twitterHandle ?? "")),
-                    .optional(.string(telegramHandle ?? "")),
-                    .optional(.string(discordHandle ?? "")),
-                    .optional(.string(threadHandle ?? "")),
-                ]
-            }
-
-            payer {
-                payMasterKeySigner.address
-            }
-
-            authorizers {
-                deviceKeySigner.address
-            }
-        }
-
-        let signedTx = try await unsignedTx.sign(signers: signers)
+        let signedTx = try await HyphenFlow.shared.makeSignedTransactionPayloadWithArguments(
+            hyphenFlowCadence: cadence,
+            args: [
+                .string(nickname),
+                .string(profileImage),
+                .array(keywords.map { .string($0) }),
+                .string(color),
+                .optional(.string(twitterHandle ?? "")),
+                .optional(.string(telegramHandle ?? "")),
+                .optional(.string(discordHandle ?? "")),
+                .optional(.string(threadHandle ?? "")),
+            ]
+        )
         let txWait = try await flow.sendTransaction(transaction: signedTx)
         print(txWait)
         let txResult = try await txWait.onceSealed()
@@ -414,7 +394,7 @@ final class SwirlBlockchainManager: NSObject {
 
     func evalProfOfMeetingSignData(lat: Float, lng: Float) async throws -> String {
         let script = Flow.Script(text: """
-        import SwirlMoment from 0x5969d51aa05825c4
+        import SwirlMoment from \(swirlContractAddress)
 
         /// Evaluate signature message (JSON payload) of Proof-of-Meeting.
         /// Of course it can be constructed on off-chain, but using this query is recommended because
@@ -448,70 +428,49 @@ final class SwirlBlockchainManager: NSObject {
     func mintMoment(
         payload: [SwirlMomentSignaturePayload]
     ) async throws {
-        let deviceKeySigner = HyphenDeviceKeySigner()
-        let serverKeySigner = HyphenServerKeySigner()
-        let payMasterKeySigner = HyphenPayMasterKeySigner()
+        let cadence = HyphenFlowCadence(
+            cadence: """
+            import NonFungibleToken from \(nonFungibleTokenAddress)
+            import MetadataViews from \(nonFungibleTokenAddress)
+            import SwirlMoment from \(swirlContractAddress)
 
-        let signers: [FlowSigner] = [serverKeySigner, deviceKeySigner, payMasterKeySigner]
+            transaction(address: [Address], lat: [Fix64], lng: [Fix64], nonce: [UInt64], keyIndex: [Int], signature: [String]) {
+                let proofs: [SwirlMoment.ProofOfMeeting]
 
-        var unsignedTx = try! await flow.buildTransaction {
-            cadence {
-                """
-                import NonFungibleToken from 0x631e88ae7f1d7c20
-                import MetadataViews from 0x631e88ae7f1d7c20
-                import SwirlMoment from 0x5969d51aa05825c4
+                prepare(signer: AuthAccount) {
+                    self.proofs = []
 
-                transaction(address: [Address], lat: [Fix64], lng: [Fix64], nonce: [UInt64], keyIndex: [Int], signature: [String]) {
-                    let proofs: [SwirlMoment.ProofOfMeeting]
-
-                    prepare(signer: AuthAccount) {
-                        self.proofs = []
-
-                        for i, addr in address {
-                            let proof = SwirlMoment.ProofOfMeeting(
-                                account: getAccount(addr),
-                                location: SwirlMoment.Coordinate(lat[i], lng[i]),
-                                nonce: nonce[i],
-                                keyIndex: keyIndex[i],
-                                signature: signature[i]
-                            )
-                            self.proofs.append(proof)
-                        }
-                    }
-
-                    execute {
-                        SwirlMoment.mint(proofs: self.proofs)
+                    for i, addr in address {
+                        let proof = SwirlMoment.ProofOfMeeting(
+                            account: getAccount(addr),
+                            location: SwirlMoment.Coordinate(lat[i], lng[i]),
+                            nonce: nonce[i],
+                            keyIndex: keyIndex[i],
+                            signature: signature[i]
+                        )
+                        self.proofs.append(proof)
                     }
                 }
 
-                """
+                execute {
+                    SwirlMoment.mint(proofs: self.proofs)
+                }
             }
 
-            proposer {
-                Flow.TransactionProposalKey(address: Flow.Address(hex: payload.first!.address), keyIndex: 1)
-            }
+            """
+        )
 
-            arguments {
-                [
-                    .array(payload.map { .address(Flow.Address(hex: $0.address)) }),
-                    .array(payload.map { .fix64(Decimal(string: $0.lat.description)!) }),
-                    .array(payload.map { .fix64(Decimal(string: $0.lng.description)!) }),
-                    .array(payload.map { .uint64(UInt64(Int64($0.nonce))) }),
-                    .array(payload.map { _ in .int(1) }),
-                    .array(payload.map { .string($0.signature) }),
-                ]
-            }
-
-            payer {
-                payMasterKeySigner.address
-            }
-
-            authorizers {
-                deviceKeySigner.address
-            }
-        }
-
-        let signedTx = try await unsignedTx.sign(signers: signers)
+        let signedTx = try await HyphenFlow.shared.makeSignedTransactionPayloadWithArguments(
+            hyphenFlowCadence: cadence,
+            args: [
+                .array(payload.map { .address(Flow.Address(hex: $0.address)) }),
+                .array(payload.map { .fix64(Decimal(string: $0.lat.description)!) }),
+                .array(payload.map { .fix64(Decimal(string: $0.lng.description)!) }),
+                .array(payload.map { .uint64(UInt64(Int64($0.nonce))) }),
+                .array(payload.map { _ in .int(1) }),
+                .array(payload.map { .string($0.signature) }),
+            ]
+        )
         let txWait = try await flow.sendTransaction(transaction: signedTx)
         let txResult = try await txWait.onceSealed()
 
@@ -519,56 +478,35 @@ final class SwirlBlockchainManager: NSObject {
     }
 
     func burnMoment(with id: UInt64) async throws {
-        let deviceKeySigner = HyphenDeviceKeySigner()
-        let serverKeySigner = HyphenServerKeySigner()
-        let payMasterKeySigner = HyphenPayMasterKeySigner()
+        let cadence = HyphenFlowCadence(
+            cadence: """
+            import NonFungibleToken from \(nonFungibleTokenAddress)
+            import SwirlMoment from \(swirlContractAddress)
 
-        let signers: [FlowSigner] = [serverKeySigner, deviceKeySigner, payMasterKeySigner]
+            transaction(id: UInt64) {
+                /// Reference that will be used for the owner's collection
+                let collectionRef: &SwirlMoment.Collection
 
-        var unsignedTx = try! await flow.buildTransaction {
-            cadence {
-                """
-                import NonFungibleToken from 0x631e88ae7f1d7c20
-                import SwirlMoment from 0x5969d51aa05825c4
+                prepare(signer: AuthAccount) {
+                    // borrow a reference to the owner's collection
+                    self.collectionRef = signer.borrow<&SwirlMoment.Collection>(from: SwirlMoment.CollectionStoragePath)
+                        ?? panic("Account does not store an object at the specified path")
 
-                transaction(id: UInt64) {
-                    /// Reference that will be used for the owner's collection
-                    let collectionRef: &SwirlMoment.Collection
-
-                    prepare(signer: AuthAccount) {
-                        // borrow a reference to the owner's collection
-                        self.collectionRef = signer.borrow<&SwirlMoment.Collection>(from: SwirlMoment.CollectionStoragePath)
-                            ?? panic("Account does not store an object at the specified path")
-
-                    }
-
-                    execute {
-                        self.collectionRef.burn(id: id)
-                    }
                 }
-                """
-            }
 
-            proposer {
-                Flow.TransactionProposalKey(address: deviceKeySigner.address, keyIndex: 1)
+                execute {
+                    self.collectionRef.burn(id: id)
+                }
             }
+            """
+        )
 
-            arguments {
-                [
-                    .uint64(id),
-                ]
-            }
-
-            payer {
-                payMasterKeySigner.address
-            }
-
-            authorizers {
-                deviceKeySigner.address
-            }
-        }
-
-        let signedTx = try await unsignedTx.sign(signers: signers)
+        let signedTx = try await HyphenFlow.shared.makeSignedTransactionPayloadWithArguments(
+            hyphenFlowCadence: cadence,
+            args: [
+                .uint64(id),
+            ]
+        )
         let txWait = try await flow.sendTransaction(transaction: signedTx)
         let txResult = try await txWait.onceSealed()
 

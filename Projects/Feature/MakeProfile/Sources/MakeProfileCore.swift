@@ -21,7 +21,7 @@ public struct MakeProfile: ReducerProtocol {
 
         public var isValid: Bool {
             let isNameValid = !nickname.isEmpty
-            let handleValid = [twitterHandle, discordHandle, telegramHandle, threadsHandle].filter { $0.isEmpty }.count < 4
+            let handleValid = [twitterHandle, discordHandle, telegramHandle, threadsHandle].filter(\.isEmpty).count < 4
             let keywordsValid = !keywords.isEmpty
 
             return isNameValid && handleValid && keywordsValid

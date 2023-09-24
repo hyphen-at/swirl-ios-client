@@ -14,7 +14,7 @@ public struct SignInConfirmation: ReducerProtocol {
         Reduce { _, action in
             switch action {
             default:
-                return .none
+                .none
             }
         }
     }

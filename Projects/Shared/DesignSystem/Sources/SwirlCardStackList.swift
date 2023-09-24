@@ -64,7 +64,7 @@ public class SwirlCardStackViewController: TGLStackedViewController {
     // MARK: - UICollectionViewDataSource protocol
 
     override public func collectionView(_: UICollectionView, numberOfItemsInSection _: Int) -> Int {
-        return profiles.count
+        profiles.count
     }
 
     override public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -86,7 +86,7 @@ struct SwirlCardStackCellWrapper: View {
     let hideMet: Bool
 
     var body: some View {
-        if let profile = profile {
+        if let profile {
             SwirlNameCard(
                 profile: profile,
                 isMyProfile: isMyProfile,

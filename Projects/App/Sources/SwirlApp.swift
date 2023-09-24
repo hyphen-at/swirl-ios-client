@@ -13,31 +13,31 @@ struct SwirlApp: View {
                 switch $0 {
                 case .signIn:
                     CaseLet(
-                        state: /SwirlRoot.State.signIn,
+                        /SwirlRoot.State.signIn,
                         action: SwirlRoot.Action.signIn,
                         then: SignInScreen.init
                     )
                 case .signInConfirmation:
                     CaseLet(
-                        state: /SwirlRoot.State.signInConfirmation,
+                        /SwirlRoot.State.signInConfirmation,
                         action: SwirlRoot.Action.signInConfirmation,
                         then: SignInConfirmationScreen.init
                     )
                 case .makeProfile:
                     CaseLet(
-                        state: /SwirlRoot.State.makeProfile,
+                        /SwirlRoot.State.makeProfile,
                         action: SwirlRoot.Action.makeProfile,
                         then: MakeProfileScreen.init
                     )
                 case .nameCardList:
                     CaseLet(
-                        state: /SwirlRoot.State.nameCardList,
+                        /SwirlRoot.State.nameCardList,
                         action: SwirlRoot.Action.nameCardList,
                         then: NameCardListScreen.init
                     )
                 case .nameCardDetail:
                     CaseLet(
-                        state: /SwirlRoot.State.nameCardDetail,
+                        /SwirlRoot.State.nameCardDetail,
                         action: SwirlRoot.Action.nameCardDetail,
                         then: NameCardDetailScreen.init
                     )

@@ -60,7 +60,7 @@ func generateRandomPastelColor(withMixedColor mixColor: UIColor?) -> Color {
     var green: CGFloat = randomColorGenerator()
     var blue: CGFloat = randomColorGenerator()
 
-    if let mixColor = mixColor {
+    if let mixColor {
         var mixRed: CGFloat = 0, mixGreen: CGFloat = 0, mixBlue: CGFloat = 0
         mixColor.getRed(&mixRed, green: &mixGreen, blue: &mixBlue, alpha: nil)
 

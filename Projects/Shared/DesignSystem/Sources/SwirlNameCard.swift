@@ -37,17 +37,15 @@ public struct SwirlNameCard: View {
 
                 let dateString = formatter.string(from: Date())
                 let dayComponent = Calendar.current.component(.day, from: Date())
-                let suffix: String
-
-                switch dayComponent {
+                let suffix = switch dayComponent {
                 case 1, 21, 31:
-                    suffix = "st"
+                    "st"
                 case 2, 22:
-                    suffix = "nd"
+                    "nd"
                 case 3, 23:
-                    suffix = "rd"
+                    "rd"
                 default:
-                    suffix = "th"
+                    "th"
                 }
 
                 return dateString.replacingOccurrences(of: " \(dayComponent) ", with: " \(dayComponent)\(suffix), ")

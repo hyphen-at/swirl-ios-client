@@ -169,9 +169,9 @@ public struct MakeProfileScreen: View {
                     }
 
                     let task = URLSession.shared.dataTask(with: url) { data, _, error in
-                        if let error = error {
+                        if let error {
                             print("Error: \(error)")
-                        } else if let data = data {
+                        } else if let data {
                             DispatchQueue.main.async {
                                 if let image = UIImage(data: data) {
                                     inputImage = image
@@ -283,7 +283,7 @@ struct MakeProfileCardContent: View {
                 }
                 .padding(.top, 36)
 
-                if let pfpImage = pfpImage {
+                if let pfpImage {
                     ZStack {
                         Rectangle()
                             .fill(Color(.gray))

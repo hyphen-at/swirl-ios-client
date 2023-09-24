@@ -29,7 +29,7 @@ public struct SwirlFlowLayout<RefreshBinding, Data, ItemView: View>: View {
     public var body: some View {
         let stack = VStack {
             GeometryReader { geometry in
-                self.content(in: geometry)
+                content(in: geometry)
             }
         }
         return Group {
